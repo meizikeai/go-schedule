@@ -1,0 +1,65 @@
+before_script:
+  - export GOROOT=/usr/local/go
+  - export PATH=$PATH:/usr/local/go/bin
+  - export GOPROXY=https://goproxy.cn,direct
+  - go version
+  - git clone https://github.com/meizikeai/gitlab-golang-shell.git
+
+.access_branch_template: &access_branch
+  only:
+    - master
+    - test
+
+variables:
+  deploys: /home/work/go-schedule
+  project: go-schedule
+  scripts: gitlab-golang-shell
+  # dingtalk: https://oapi.dingtalk.com/robot/send?access_token=XXX
+  feishu: https://open.feishu.cn/open-apis/bot/hook/4cd5df823a244f728bdfc948d752b18e
+
+stages:
+  - module
+  - build
+  - deploy-development
+  - deploy-production
+
+cache:
+  key: ${CI_BUILD_REF_NAME}
+  paths:
+    - version
+    - go-schedule
+
+module:
+  <<: *access_branch
+  stage: module
+  script:
+    - bash $scripts/declare.sh
+    - bash $scripts/module.sh
+
+build:
+  <<: *access_branch
+  stage: build
+  script:
+    - bash $scripts/build.sh
+
+deploy-development:
+  stage: deploy-development
+  when: on_success
+  script:
+    - bash $scripts/rollback.sh
+    - bash $scripts/deploy.sh "work@127.0.0.1"
+  environment:
+    name: development
+  only:
+    - test
+
+deploy-production:
+  stage: deploy-production
+  when: manual
+  script:
+    - bash $scripts/rollback.sh
+    - bash $scripts/deploy.sh "work@127.0.0.1"
+  environment:
+    name: production
+  only:
+    - master

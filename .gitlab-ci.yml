@@ -1,5 +1,4 @@
 before_script:
-  - export GOROOT=/usr/local/go
   - export PATH=$PATH:/usr/local/go/bin
   - export GOPROXY=https://goproxy.cn,direct
   - go version
@@ -16,6 +15,7 @@ variables:
   scripts: gitlab-golang-shell
   # dingtalk: https://oapi.dingtalk.com/robot/send?access_token=XXX
   feishu: https://open.feishu.cn/open-apis/bot/hook/4cd5df823a244f728bdfc948d752b18e
+  feishuv2: https://open.feishu.cn/open-apis/bot/v2/hook/fd364684-aba9-4dc2-a618-9474dbd67572
 
 stages:
   - module

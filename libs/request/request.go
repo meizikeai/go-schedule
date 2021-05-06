@@ -3,23 +3,26 @@ package request
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"go-schedule/libs/tool"
-	"go-schedule/libs/types"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 
+	"go-schedule/libs/tool"
+	"go-schedule/libs/types"
+
 	log "github.com/sirupsen/logrus"
 )
 
-func Get(reqUrl string, reqParams types.MapStringString) ([]byte, error) {
+func GET(reqUrl string, reqParams types.MapStringString, headers types.MapStringString) ([]byte, error) {
+	var req *http.Request
+	result := []byte{}
+
 	params := url.Values{}
 	urlPath, err := url.Parse(reqUrl)
 
 	if err != nil {
 		log.Error(err)
-		return []byte{}, err
+		return result, err
 	}
 
 	for key, val := range reqParams {
@@ -27,19 +30,36 @@ func Get(reqUrl string, reqParams types.MapStringString) ([]byte, error) {
 	}
 
 	urlPath.RawQuery = params.Encode()
-	res, err := http.Get(urlPath.String())
+	url := urlPath.String()
+
+	req, err = http.NewRequest("GET", url, nil)
 
 	if err != nil {
 		log.Error(err)
-		return []byte{}, err
+		return result, err
 	}
 
-	defer res.Body.Close()
+	req.Header.Set("Content-Type", "application/json")
 
-	result, err := ioutil.ReadAll(res.Body)
+	if headers != nil {
+		for key, val := range headers {
+			req.Header.Add(key, val)
+		}
+	}
+
+	pool := &http.Client{}
+	res, err := pool.Do(req)
 
 	if err != nil {
 		log.Error(err)
+		return result, err
+	}
+
+	result, err = ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Error(err)
+		return result, err
 	}
 
 	record := types.MapStringInterface{
@@ -52,15 +72,16 @@ func Get(reqUrl string, reqParams types.MapStringString) ([]byte, error) {
 	return result, err
 }
 
-func Post(url string, body types.MapStringInterface, params types.MapStringString, headers types.MapStringString) ([]byte, error) {
+func POST(reqUrl string, body types.MapStringInterface, params types.MapStringString, headers types.MapStringString) ([]byte, error) {
 	var req *http.Request
+	result := []byte{}
 
 	data, _ := json.Marshal(body)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", reqUrl, bytes.NewBuffer(data))
 
 	if err != nil {
 		log.Error(err)
-		return nil, errors.New("new request is fail")
+		return result, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -86,15 +107,16 @@ func Post(url string, body types.MapStringInterface, params types.MapStringStrin
 
 	if err != nil {
 		log.Error(err)
-		return []byte{}, err
+		return result, err
 	}
 
 	defer res.Body.Close()
 
-	result, err := ioutil.ReadAll(res.Body)
+	result, err = ioutil.ReadAll(res.Body)
 
 	if err != nil {
 		log.Error(err)
+		return result, err
 	}
 
 	record := types.MapStringInterface{

@@ -36,7 +36,30 @@ https://github.com/meizikeai/go-schedule.git
 
 为了区分本地开发，增加 `export GIN_ENV=debug` 环境变量。
 
+#### 自动部署
+
+如果使用 GitLab 作仓库，可以使用 https://github.com/meizikeai/gitlab-golang-shell.git 跑CI/CD，项目默认有 .gitlab-ci.yml 文件，请君参考！
+
 #### 学习资料
 
-  + https://crontab.guru
-  + https://github.com/robfig/cron
+**Go 语言设计与实现**
+
+  + https://draveness.me/golang
+
+**幼麟实验室 Golang 合辑**
+
+  + https://space.bilibili.com/567195437
+
+**Golang Example**
+
+  + https://gobyexample.com
+  + https://gowebexamples.com
+
+**学习 Go 语言**
+
+  + https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/preface.md
+  + https://github.com/unknwon/the-way-to-go_ZH_CN/blob/master/eBook/directory.md
+
+**Go 操作 Redis 实战**
+
+  + https://www.cnblogs.com/itbsl/p/14198111.html

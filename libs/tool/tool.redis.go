@@ -22,7 +22,7 @@ func HandleLocalRedisConfig() {
 	pwd, _ := os.Getwd()
 	mode := GetGinMODE()
 
-	address := strings.Join([]string{pwd, "/conf/", mode, "-redis.json"}, "")
+	address := strings.Join([]string{pwd, "/conf/", mode, ".redis.json"}, "")
 
 	res, err := ioutil.ReadFile(address)
 

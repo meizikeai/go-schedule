@@ -22,7 +22,7 @@ func HandleLocalMysqlConfig() {
 	pwd, _ := os.Getwd()
 	mode := GetGinMODE()
 
-	address := strings.Join([]string{pwd, "/conf/", mode, "-mysql.json"}, "")
+	address := strings.Join([]string{pwd, "/conf/", mode, ".mysql.json"}, "")
 
 	res, err := ioutil.ReadFile(address)
 

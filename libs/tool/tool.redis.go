@@ -3,10 +3,11 @@ package tool
 import (
 	"context"
 	"encoding/json"
-	"go-schedule/libs/types"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"go-schedule/libs/types"
 
 	"github.com/go-redis/redis/v8"
 	log "github.com/sirupsen/logrus"

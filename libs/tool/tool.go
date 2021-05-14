@@ -3,9 +3,10 @@ package tool
 import (
 	"crypto/rand"
 	"encoding/json"
-	"go-schedule/libs/types"
 	"math/big"
 	"os"
+
+	"go-schedule/libs/types"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/robfig/cron/v3"

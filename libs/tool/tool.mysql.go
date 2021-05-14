@@ -3,11 +3,12 @@ package tool
 import (
 	"database/sql"
 	"encoding/json"
-	"go-schedule/libs/types"
 	"io/ioutil"
 	"os"
 	"strings"
 	"time"
+
+	"go-schedule/libs/types"
 
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"

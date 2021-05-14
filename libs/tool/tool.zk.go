@@ -2,13 +2,14 @@ package tool
 
 import (
 	"encoding/json"
-	"go-schedule/conf"
-	"go-schedule/libs/types"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"time"
+
+	"go-schedule/conf"
+	"go-schedule/libs/types"
 
 	"github.com/samuel/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
@@ -84,7 +85,7 @@ func GetZookeeperServerConfig() types.MapStringString {
 	return zookeeperServer
 }
 
-func GetZookeeperRedisConfig() types.MapStringString {
+func GetZookeeperStringConfig() types.MapStringString {
 	return zookeeperString
 }
 

@@ -1,12 +1,13 @@
 package test
 
 import (
-	"go-schedule/libs/tool"
-	"go-schedule/models"
 	"math/rand"
 	"strconv"
 	"sync"
 	"time"
+
+	"go-schedule/libs/tool"
+	"go-schedule/models"
 
 	log "github.com/sirupsen/logrus"
 )

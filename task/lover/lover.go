@@ -2,10 +2,11 @@ package lover
 
 import (
 	"fmt"
-	"go-schedule/models"
 	"strconv"
 	"strings"
 	"time"
+
+	"go-schedule/models"
 
 	log "github.com/sirupsen/logrus"
 )

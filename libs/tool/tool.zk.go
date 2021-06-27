@@ -76,9 +76,6 @@ func HandleZookeeperConfig() {
 			zookeeperServer = config
 		}
 	}
-	log.Info(zookeeperMySQL)
-	log.Info(zookeeperRedis)
-	log.Info(zookeeperServer)
 }
 
 func GetZookeeperServerConfig() types.MapStringString {
@@ -101,7 +98,6 @@ func readZookeeperConfig() confZookeeper {
 	var config confZookeeper
 
 	pwd, _ := os.Getwd()
-	// address := strings.Join([]string{pwd, "/conf/zk.json"}, "")
 	address := filepath.Join(pwd, "/conf/zk.json")
 	res, err := ioutil.ReadFile(address)
 

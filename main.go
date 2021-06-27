@@ -21,29 +21,17 @@ func init() {
 
 func main() {
 	a := tool.HandleCron("*/1 * * * *", func() {
-		// 简单输出
 		test.OneJob()
-
-		// 随机插入
 		// test.TwoJob()
-
-		// 处理数据
 		lover.HandleLoverGift()
 	})
 
 	defer a.Stop()
 
 	b := tool.HandleCron("*/1 * * * *", func() {
-		// 并发等待组
 		test.ThreeJob()
-
-		// FourJob
 		test.FourJob()
-
-		// FiveJob
 		test.FiveJob()
-
-		// SixJob
 		test.SixJob()
 	})
 

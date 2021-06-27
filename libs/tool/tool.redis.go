@@ -70,18 +70,12 @@ func getLocalRedisConfig() types.FullConfRedis {
 }
 
 func createRedisClient(config types.OutConfRedis) *redis.Client {
-	// db *redis.Client
-	// 可长期存在，不建议频繁开启/关闭
-	// defer db.Close()
-
-	// create client
 	db := redis.NewClient(&redis.Options{
 		Addr:     config.Addr,
 		Password: config.Password,
 		DB:       config.Db,
 	})
 
-	// test client
 	_, err := db.Ping(ctx).Result()
 
 	if err != nil {

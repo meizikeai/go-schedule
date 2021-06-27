@@ -14,6 +14,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var ConnMax = types.ConnMax{
+	MaxLifetime: 4,
+	MaxIdleConn: 200,
+	MaxOpenConn: 200,
+}
 var fullDbMySQL map[string]*sql.DB
 var mysqlConfig types.FullConfMySQL
 
@@ -31,7 +36,6 @@ func HandleLocalMysqlConfig() {
 		log.Fatal(err)
 	}
 
-	// 解析json
 	err = json.Unmarshal(res, &config)
 
 	if err != nil {
@@ -73,20 +77,14 @@ func getLocalMysqlConfig() types.FullConfMySQL {
 }
 
 func createMySQLClient(config types.OutConfMySQL) *sql.DB {
-	// db *sql.DB
-	// 可长期存在，不建议频繁开启/关闭
-	// defer db.Close()
-
 	path := strings.Join([]string{config.Username, ":", config.Password, "@tcp(", config.Addr, ")/", config.Database, "?charset=utf8"}, "")
 
-	// create client
 	db, err := sql.Open("mysql", path)
 
-	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(20)
-	db.SetMaxIdleConns(20)
+	db.SetConnMaxLifetime(time.Duration(ConnMax.MaxLifetime) * time.Hour)
+	db.SetMaxIdleConns(ConnMax.MaxIdleConn)
+	db.SetMaxOpenConns(ConnMax.MaxOpenConn)
 
-	// test client
 	err = db.Ping()
 
 	if err != nil {

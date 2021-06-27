@@ -3,7 +3,6 @@ package types
 type MapStringInterface map[string]interface{}
 type MapStringString map[string]string
 
-// MySQL config
 type ConfMySQL struct {
 	Master   []string `json:"master"`
 	Slave    []string `json:"slave"`
@@ -19,7 +18,6 @@ type OutConfMySQL struct {
 }
 type FullConfMySQL map[string]ConfMySQL
 
-// Redis config
 type ConfRedis struct {
 	Master   []string `json:"master"`
 	Password string   `json:"password"`
@@ -31,3 +29,9 @@ type OutConfRedis struct {
 	Db       int    `json:"db"`
 }
 type FullConfRedis map[string]ConfRedis
+
+type ConnMax struct {
+	MaxLifetime int64 `json:"MaxLifetime"`
+	MaxIdleConn int   `json:"MaxIdleConn"`
+	MaxOpenConn int   `json:"MaxOpenConn"`
+}

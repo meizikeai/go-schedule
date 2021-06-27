@@ -46,7 +46,6 @@ func HandleLoverGift() {
 			result = append(result, strings.Join(str, ""))
 		}
 	}
-	// log.Info(result)
 
 	if len(result) > 0 {
 		for _, v := range result {

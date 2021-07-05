@@ -5,16 +5,26 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"strings"
+	"time"
 
 	"go-schedule/libs/types"
 
 	"github.com/go-redis/redis/v8"
+
 	log "github.com/sirupsen/logrus"
 )
 
-var ctx = context.Background()
-var fullDbRedis map[string]*redis.Client
+var connRedis = types.OutConfRedis{
+	MaxRetries:         2,
+	PoolSize:           10,
+	ReadTimeout:        300,
+	WriteTimeout:       300,
+	IdleTimeout:        300,
+	IdleCheckFrequency: 3600,
+}
+var fullDbRedis map[string][]*redis.Client
 var redisConfig types.FullConfRedis
 
 func HandleLocalRedisConfig() {
@@ -41,25 +51,34 @@ func HandleLocalRedisConfig() {
 }
 
 func GetRedisClient(key string) *redis.Client {
-	return fullDbRedis[key]
+	result := fullDbRedis[key]
+	count := GetRandmod(len(result))
+
+	return result[count]
 }
 
 func HandleRedisClient() {
-	config := make(map[string]*redis.Client)
+	config := make(map[string][]*redis.Client)
 
-	one := getZookeeperRedisConfig()
-	two := getLocalRedisConfig()
+	zookeeper := getZookeeperRedisConfig()
+	local := getLocalRedisConfig()
 
-	for key, val := range one {
-		m := getRedisConfig(val)
+	for k, v := range zookeeper {
+		key := k + ".master"
 
-		config[key+".master"] = createRedisClient(m)
+		for _, addr := range v.Master {
+			clients := handleRedisClient(addr, v.Password, v.Db)
+			config[key] = append(config[key], clients)
+		}
 	}
 
-	for key, val := range two {
-		m := getRedisConfig(val)
+	for k, v := range local {
+		key := k + ".master"
 
-		config[key+".master"] = createRedisClient(m)
+		for _, addr := range v.Master {
+			clients := handleRedisClient(addr, v.Password, v.Db)
+			config[key] = append(config[key], clients)
+		}
 	}
 
 	fullDbRedis = config
@@ -71,12 +90,18 @@ func getLocalRedisConfig() types.FullConfRedis {
 
 func createRedisClient(config types.OutConfRedis) *redis.Client {
 	db := redis.NewClient(&redis.Options{
-		Addr:     config.Addr,
-		Password: config.Password,
-		DB:       config.Db,
+		Addr:               config.Addr,
+		Password:           config.Password,
+		DB:                 config.Db,
+		MaxRetries:         config.MaxRetries,
+		PoolSize:           config.PoolSize * runtime.NumCPU(),
+		ReadTimeout:        time.Duration(config.ReadTimeout) * time.Millisecond,
+		WriteTimeout:       time.Duration(config.WriteTimeout) * time.Millisecond,
+		IdleTimeout:        time.Duration(config.IdleTimeout) * time.Second,
+		IdleCheckFrequency: time.Duration(config.IdleCheckFrequency) * time.Second,
 	})
 
-	_, err := db.Ping(ctx).Result()
+	_, err := db.Ping(context.Background()).Result()
 
 	if err != nil {
 		log.Fatal(err)
@@ -85,16 +110,20 @@ func createRedisClient(config types.OutConfRedis) *redis.Client {
 	return db
 }
 
-func getRedisConfig(config types.ConfRedis) types.OutConfRedis {
-	where := config.Master
-
-	i := GetRandmod(len(where))
-
-	r := types.OutConfRedis{
-		Addr:     where[i],
-		Password: config.Password,
-		Db:       config.Db,
+func handleRedisClient(addr string, password string, db int) *redis.Client {
+	option := types.OutConfRedis{
+		Addr:               addr,
+		Password:           password,
+		Db:                 db,
+		MaxRetries:         connRedis.MaxRetries,
+		PoolSize:           connRedis.PoolSize,
+		ReadTimeout:        connRedis.ReadTimeout,
+		WriteTimeout:       connRedis.WriteTimeout,
+		IdleTimeout:        connRedis.IdleTimeout,
+		IdleCheckFrequency: connRedis.IdleCheckFrequency,
 	}
 
-	return r
+	client := createRedisClient(option)
+
+	return client
 }

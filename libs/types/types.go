@@ -27,10 +27,19 @@ type OutConfRedis struct {
 	Addr     string `json:"addr"`
 	Password string `json:"password"`
 	Db       int    `json:"db"`
+
+	MaxRetries         int `json:"max_retries"`
+	PoolSize           int `json:"pool_size"`
+	ReadTimeout        int `json:"read_timeout"`
+	WriteTimeout       int `json:"write_timeout"`
+	IdleTimeout        int `json:"idle_timeout"`
+	IdleCheckFrequency int `json:"idle_check_frequency"`
+	MaxConnAge         int `json:"max_conn_age"`
+	PoolTimeout        int `json:"pool_timeout"`
 }
 type FullConfRedis map[string]ConfRedis
 
-type ConnMax struct {
+type ConnMySQLMax struct {
 	MaxLifetime int64 `json:"MaxLifetime"`
 	MaxIdleConn int   `json:"MaxIdleConn"`
 	MaxOpenConn int   `json:"MaxOpenConn"`

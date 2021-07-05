@@ -45,14 +45,15 @@ func UnmarshalJson(date string) types.MapStringInterface {
 	return res
 }
 
-func GetRandmod(length int) int {
+func GetRandmod(length int) int64 {
+	result := int64(0)
 	res, err := rand.Int(rand.Reader, big.NewInt(int64(length)))
 
 	if err != nil {
-		log.Fatal(err)
+		return result
 	}
 
-	return int(res.Int64())
+	return res.Int64()
 }
 
 func GetGinMODE() string {

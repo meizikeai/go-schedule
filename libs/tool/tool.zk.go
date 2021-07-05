@@ -12,6 +12,7 @@ import (
 	"go-schedule/libs/types"
 
 	"github.com/samuel/go-zookeeper/zk"
+
 	log "github.com/sirupsen/logrus"
 )
 

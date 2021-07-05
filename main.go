@@ -3,15 +3,15 @@ package main
 import (
 	"go-schedule/libs/log"
 	"go-schedule/libs/tool"
-	"go-schedule/task/lover"
 	"go-schedule/task/test"
 )
 
 func init() {
 	tool.HandleZookeeperConfig()
 
-	tool.HandleLocalMysqlConfig()
-	tool.HandleLocalRedisConfig()
+	// not recommended for use
+	// tool.HandleLocalMysqlConfig()
+	// tool.HandleLocalRedisConfig()
 
 	tool.HandleMySQLClient()
 	tool.HandleRedisClient()
@@ -23,7 +23,7 @@ func main() {
 	a := tool.HandleCron("*/1 * * * *", func() {
 		test.OneJob()
 		// test.TwoJob()
-		lover.HandleLoverGift()
+		test.HandleLoverGift()
 	})
 
 	defer a.Stop()

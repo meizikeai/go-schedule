@@ -14,12 +14,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var ConnMax = types.ConnMax{
+var connMySQL = types.ConnMySQLMax{
 	MaxLifetime: 4,
 	MaxIdleConn: 200,
 	MaxOpenConn: 200,
 }
-var fullDbMySQL map[string]*sql.DB
+var fullDbMySQL map[string][]*sql.DB
 var mysqlConfig types.FullConfMySQL
 
 func HandleLocalMysqlConfig() {
@@ -46,27 +46,46 @@ func HandleLocalMysqlConfig() {
 }
 
 func GetMySQLClient(key string) *sql.DB {
-	return fullDbMySQL[key]
+	result := fullDbMySQL[key]
+	count := GetRandmod(len(result))
+
+	return result[count]
 }
 
 func HandleMySQLClient() {
-	config := make(map[string]*sql.DB)
+	config := make(map[string][]*sql.DB)
 
-	one := getZookeeperMysqlConfig()
-	two := getLocalMysqlConfig()
+	zookeeper := getZookeeperMysqlConfig()
+	local := getLocalMysqlConfig()
 
-	for key, val := range one {
-		m, s := getMySQLConfig(val)
+	for k, v := range zookeeper {
+		m := k + ".master"
+		s := k + ".slave"
 
-		config[key+".master"] = createMySQLClient(m)
-		config[key+".slave"] = createMySQLClient(s)
+		for _, addr := range v.Master {
+			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			config[m] = append(config[m], clients)
+		}
+
+		for _, addr := range v.Slave {
+			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			config[s] = append(config[s], clients)
+		}
 	}
 
-	for key, val := range two {
-		m, s := getMySQLConfig(val)
+	for k, v := range local {
+		m := k + ".master"
+		s := k + ".slave"
 
-		config[key+".master"] = createMySQLClient(m)
-		config[key+".slave"] = createMySQLClient(s)
+		for _, addr := range v.Master {
+			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			config[m] = append(config[m], clients)
+		}
+
+		for _, addr := range v.Slave {
+			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			config[s] = append(config[s], clients)
+		}
 	}
 
 	fullDbMySQL = config
@@ -81,9 +100,9 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 
 	db, err := sql.Open("mysql", path)
 
-	db.SetConnMaxLifetime(time.Duration(ConnMax.MaxLifetime) * time.Hour)
-	db.SetMaxIdleConns(ConnMax.MaxIdleConn)
-	db.SetMaxOpenConns(ConnMax.MaxOpenConn)
+	db.SetConnMaxLifetime(time.Duration(connMySQL.MaxLifetime) * time.Hour)
+	db.SetMaxIdleConns(connMySQL.MaxIdleConn)
+	db.SetMaxOpenConns(connMySQL.MaxOpenConn)
 
 	err = db.Ping()
 
@@ -94,26 +113,15 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	return db
 }
 
-func getMySQLConfig(config types.ConfMySQL) (types.OutConfMySQL, types.OutConfMySQL) {
-	master := config.Master
-	slave := config.Slave
-
-	i := GetRandmod(len(master))
-	j := GetRandmod(len(slave))
-
-	m := types.OutConfMySQL{
-		Addr:     master[i],
-		Username: config.Username,
-		Password: config.Password,
-		Database: config.Database,
+func handleMySQLClient(addr string, username string, password string, database string) *sql.DB {
+	option := types.OutConfMySQL{
+		Addr:     addr,
+		Username: username,
+		Password: password,
+		Database: database,
 	}
 
-	s := types.OutConfMySQL{
-		Addr:     slave[j],
-		Username: config.Username,
-		Password: config.Password,
-		Database: config.Database,
-	}
+	client := createMySQLClient(option)
 
-	return m, s
+	return client
 }

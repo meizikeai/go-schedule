@@ -26,7 +26,7 @@ func HandleLocalMysqlConfig() {
 	var config types.FullConfMySQL
 
 	pwd, _ := os.Getwd()
-	mode := GetGinMODE()
+	mode := GetMODE()
 
 	address := strings.Join([]string{pwd, "/conf/", mode, ".mysql.json"}, "")
 

@@ -31,7 +31,7 @@ func HandleLocalRedisConfig() {
 	var config types.FullConfRedis
 
 	pwd, _ := os.Getwd()
-	mode := GetGinMODE()
+	mode := GetMODE()
 
 	address := strings.Join([]string{pwd, "/conf/", mode, ".redis.json"}, "")
 

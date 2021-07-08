@@ -13,7 +13,7 @@ import (
 
 func HandleLogger(app string) {
 	pwd, _ := os.Getwd()
-	mode := os.Getenv("GIN_ENV")
+	mode := os.Getenv("GIN_MODE")
 
 	infoPath := filepath.Join("/data/logs/", app, "/info.log")
 	errorPath := filepath.Join("/data/logs/", app, "/error.log")

@@ -100,6 +100,10 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 
 	db, err := sql.Open("mysql", path)
 
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	db.SetConnMaxLifetime(time.Duration(connMySQL.MaxLifetime) * time.Hour)
 	db.SetMaxIdleConns(connMySQL.MaxIdleConn)
 	db.SetMaxOpenConns(connMySQL.MaxOpenConn)

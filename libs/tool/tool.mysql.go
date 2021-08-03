@@ -10,6 +10,7 @@ import (
 
 	"go-schedule/libs/types"
 
+	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 )
@@ -96,9 +97,8 @@ func getLocalMysqlConfig() types.FullConfMySQL {
 }
 
 func createMySQLClient(config types.OutConfMySQL) *sql.DB {
-	path := strings.Join([]string{config.Username, ":", config.Password, "@tcp(", config.Addr, ")/", config.Database, "?charset=utf8"}, "")
-
-	db, err := sql.Open("mysql", path)
+	dsn := createDSN(config.Addr, config.Username, config.Password, config.Database)
+	db, err := sql.Open("mysql", dsn)
 
 	if err != nil {
 		log.Fatal(err)
@@ -128,4 +128,25 @@ func handleMySQLClient(addr string, username string, password string, database s
 	client := createMySQLClient(option)
 
 	return client
+}
+
+// timeout、readTimeout、writeTimeout default 1s
+func createDSN(addr string, user string, passwd string, dbname string) string {
+	config := mysql.Config{
+		User:             user,                           // Username
+		Passwd:           passwd,                         // Password (requires User)
+		Net:              "tcp",                          // Network type - default: "tcp"
+		Addr:             addr,                           // Network address (requires Net)
+		DBName:           dbname,                         // Database name
+		MaxAllowedPacket: 4194304,                        // Max packet size allowed  - default: 4194304
+		Timeout:          time.Second * time.Duration(1), // Dial timeout
+		ReadTimeout:      time.Second * time.Duration(1), // I/O read timeout
+		WriteTimeout:     time.Second * time.Duration(1), // I/O write timeout
+
+		AllowNativePasswords: true, // Allows the native password authentication method - default: true
+		CheckConnLiveness:    true, // Check connections for liveness before using them - default: true
+		InterpolateParams:    true, // Interpolate placeholders into query string  - default: false
+	}
+
+	return config.FormatDSN()
 }

@@ -40,6 +40,37 @@ https://github.com/meizikeai/go-schedule.git
 
 如果使用 GitLab 作仓库，可以使用 https://github.com/meizikeai/gitlab-golang-shell.git 跑CI/CD，项目默认有 .gitlab-ci.yml 文件，请君参考！
 
+#### 帮助文档
+
+```sh
+# program 为 [program:go-practice] 里配置的值
+# start、restart、stop、remove、add 都不会载入最新的配置文件
+
+# start      启动程序
+# status     查看程序状态
+# stop       关闭程序
+# tail       查看进程日志
+# update     重启配置文件修改过的程序
+# reload     停止程序，重新加载所有程序
+# reread     读取有更新（增加）的配置文件，不会启动新添加的程序
+# restart    重启程序
+
+# 执行某个进程
+$ supervisorctl restart program
+
+# 一次性执行全部进程
+$ supervisorctl restart all
+
+# 载入最新的配置文件，停止原有进程并按新的配置启动所有进程
+$ supervisorctl reload
+
+# 根据最新的配置文件，启动新配置或有改动的进程，配置没有改动的进程不重启
+$ supervisorctl update
+
+# 查看运行状态
+$ supervisorctl status
+```
+
 #### 学习资料
 
 **Go 语言设计与实现**

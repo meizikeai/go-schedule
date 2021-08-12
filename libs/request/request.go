@@ -130,7 +130,7 @@ func DELETE(reqUrl string, body interface{}, params types.MapStringString, heade
 	result := []byte{}
 
 	data, _ := json.Marshal(body)
-	req, err := http.NewRequest(http.MethodPost, reqUrl, bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodDelete, reqUrl, bytes.NewBuffer(data))
 
 	if err != nil {
 		log.Error(err)

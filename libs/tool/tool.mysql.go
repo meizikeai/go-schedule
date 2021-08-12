@@ -96,6 +96,7 @@ func getLocalMysqlConfig() types.FullConfMySQL {
 	return mysqlConfig
 }
 
+// timeout、readTimeout、writeTimeout default 1s
 func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	dsn := createDSN(config.Addr, config.Username, config.Password, config.Database)
 	db, err := sql.Open("mysql", dsn)
@@ -130,7 +131,7 @@ func handleMySQLClient(addr string, username string, password string, database s
 	return client
 }
 
-// timeout、readTimeout、writeTimeout default 1s
+// 连接、读、写超时请安需调整，默认一秒
 func createDSN(addr string, user string, passwd string, dbname string) string {
 	config := mysql.Config{
 		User:             user,                           // Username

@@ -3,6 +3,7 @@ module go-schedule
 go 1.16
 
 require (
+	github.com/Shopify/sarama v1.29.1
 	github.com/go-redis/redis/v8 v8.8.2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/jonboulle/clockwork v0.2.2 // indirect
@@ -14,5 +15,4 @@ require (
 	github.com/samuel/go-zookeeper v0.0.0-20201211165307-7117e9ea2414
 	github.com/sirupsen/logrus v1.8.1
 	go.opentelemetry.io/otel v0.20.0 // indirect
-	golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096 // indirect
 )

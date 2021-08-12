@@ -24,18 +24,17 @@ type ConfRedis struct {
 	Db       int      `json:"db"`
 }
 type OutConfRedis struct {
-	Addr     string `json:"addr"`
-	Password string `json:"password"`
-	Db       int    `json:"db"`
-
-	MaxRetries         int `json:"max_retries"`
-	PoolSize           int `json:"pool_size"`
-	ReadTimeout        int `json:"read_timeout"`
-	WriteTimeout       int `json:"write_timeout"`
-	IdleTimeout        int `json:"idle_timeout"`
-	IdleCheckFrequency int `json:"idle_check_frequency"`
-	MaxConnAge         int `json:"max_conn_age"`
-	PoolTimeout        int `json:"pool_timeout"`
+	Addr               string `json:"addr"`
+	Username           string `json:"username"`
+	Password           string `json:"password"`
+	DB                 int    `json:"db"`
+	MaxRetries         int    `json:"max_retries"`
+	DialTimeout        int    `json:"dial_timeout"`
+	ReadTimeout        int    `json:"read_timeout"`
+	WriteTimeout       int    `json:"write_timeout"`
+	PoolSize           int    `json:"pool_size"`
+	IdleTimeout        int    `json:"idle_timeout"`
+	IdleCheckFrequency int    `json:"idle_check_frequency"`
 }
 type FullConfRedis map[string]ConfRedis
 

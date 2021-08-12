@@ -15,6 +15,8 @@ func init() {
 
 	tool.HandleMySQLClient()
 	tool.HandleRedisClient()
+	// tool.HandleKafkaProducerClient()
+	// tool.HandleKafkaConsumerClient()
 
 	log.HandleLogger("go-schedule")
 }
@@ -23,7 +25,7 @@ func main() {
 	a := tool.HandleCron("*/1 * * * *", func() {
 		test.OneJob()
 		// test.TwoJob()
-		test.HandleLoverGift()
+		// test.HandleLoverGift()
 	})
 
 	defer a.Stop()
@@ -31,11 +33,17 @@ func main() {
 	b := tool.HandleCron("*/1 * * * *", func() {
 		test.ThreeJob()
 		test.FourJob()
-		test.FiveJob()
-		test.SixJob()
+		// test.FiveJob()
+		// test.SixJob()
 	})
 
 	defer b.Stop()
+
+	// kafka producer
+	// tool.SendKafkaProducerMessage("broker", "topic", "sync", "test")
+
+	// kafka consumer
+	// tool.HandlerKafkaConsumerMessage("broker", "topic")
 
 	select {}
 }

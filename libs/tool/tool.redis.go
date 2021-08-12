@@ -17,12 +17,13 @@ import (
 )
 
 var connRedis = types.OutConfRedis{
-	MaxRetries:         2,
+	MaxRetries:         3,
+	DialTimeout:        5,
+	ReadTimeout:        500,
+	WriteTimeout:       500,
 	PoolSize:           10,
-	ReadTimeout:        300,
-	WriteTimeout:       300,
 	IdleTimeout:        300,
-	IdleCheckFrequency: 3600,
+	IdleCheckFrequency: 60,
 }
 var fullDbRedis map[string][]*redis.Client
 var redisConfig types.FullConfRedis
@@ -91,12 +92,15 @@ func getLocalRedisConfig() types.FullConfRedis {
 func createRedisClient(config types.OutConfRedis) *redis.Client {
 	db := redis.NewClient(&redis.Options{
 		Addr:               config.Addr,
+		Username:           config.Username,
 		Password:           config.Password,
-		DB:                 config.Db,
+		DB:                 config.DB,
 		MaxRetries:         config.MaxRetries,
-		PoolSize:           config.PoolSize * runtime.NumCPU(),
+		DialTimeout:        time.Duration(config.DialTimeout) * time.Second,
 		ReadTimeout:        time.Duration(config.ReadTimeout) * time.Millisecond,
 		WriteTimeout:       time.Duration(config.WriteTimeout) * time.Millisecond,
+		PoolSize:           config.PoolSize * runtime.NumCPU(),
+		PoolTimeout:        time.Duration(config.ReadTimeout)*time.Millisecond + time.Second,
 		IdleTimeout:        time.Duration(config.IdleTimeout) * time.Second,
 		IdleCheckFrequency: time.Duration(config.IdleCheckFrequency) * time.Second,
 	})
@@ -114,7 +118,7 @@ func handleRedisClient(addr string, password string, db int) *redis.Client {
 	option := types.OutConfRedis{
 		Addr:               addr,
 		Password:           password,
-		Db:                 db,
+		DB:                 db,
 		MaxRetries:         connRedis.MaxRetries,
 		PoolSize:           connRedis.PoolSize,
 		ReadTimeout:        connRedis.ReadTimeout,

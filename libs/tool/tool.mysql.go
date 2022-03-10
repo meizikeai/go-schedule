@@ -16,9 +16,9 @@ import (
 )
 
 var connMySQL = types.ConnMySQLMax{
-	MaxLifetime: 4,
-	MaxIdleConn: 200,
-	MaxOpenConn: 200,
+	MaxLifetime: 300,
+	MaxIdleConn: 1000,
+	MaxOpenConn: 2000,
 }
 var fullDbMySQL map[string][]*sql.DB
 var mysqlConfig types.FullConfMySQL
@@ -105,7 +105,7 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 		log.Fatal(err)
 	}
 
-	db.SetConnMaxLifetime(time.Duration(connMySQL.MaxLifetime) * time.Hour)
+	db.SetConnMaxLifetime(time.Second * time.Duration(connMySQL.MaxLifetime))
 	db.SetMaxIdleConns(connMySQL.MaxIdleConn)
 	db.SetMaxOpenConns(connMySQL.MaxOpenConn)
 
@@ -140,9 +140,9 @@ func createDSN(addr string, user string, passwd string, dbname string) string {
 		Addr:             addr,                           // Network address (requires Net)
 		DBName:           dbname,                         // Database name
 		MaxAllowedPacket: 4194304,                        // Max packet size allowed  - default: 4194304
-		Timeout:          time.Second * time.Duration(1), // Dial timeout
-		ReadTimeout:      time.Second * time.Duration(1), // I/O read timeout
-		WriteTimeout:     time.Second * time.Duration(1), // I/O write timeout
+		Timeout:          time.Second * time.Duration(3), // Dial timeout
+		ReadTimeout:      time.Second * time.Duration(3), // I/O read timeout
+		WriteTimeout:     time.Second * time.Duration(3), // I/O write timeout
 
 		AllowNativePasswords: true, // Allows the native password authentication method - default: true
 		CheckConnLiveness:    true, // Check connections for liveness before using them - default: true

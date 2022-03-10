@@ -7,15 +7,16 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-var kafkaConfig = map[string]string{
-	"broker": "127.0.0.1:9092,127.0.0.1:9092,127.0.0.1:9092",
-}
+// var kafkaConfig = map[string]string{
+// 	"broker": "127.0.0.1:9092,127.0.0.1:9092,127.0.0.1:9092",
+// }
 
 var fullProducerKafka map[string]sarama.AsyncProducer
 var fullConsumerKafka map[string]sarama.Consumer
 
 // producer
 func HandleKafkaProducerClient() {
+	kafkaConfig := GetZookeeperStringConfig()
 	result := make(map[string]sarama.AsyncProducer, len(kafkaConfig))
 
 	for k, v := range kafkaConfig {
@@ -40,13 +41,14 @@ func createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {
 	return producer
 }
 
-func getKafkaProducerClient(key string) sarama.AsyncProducer {
+func GetKafkaProducerClient(key string) sarama.AsyncProducer {
 	result := fullProducerKafka[key]
 	return result
 }
 
+// demo
 func SendKafkaProducerMessage(broker string, topic string, key string, data string) {
-	producer := getKafkaProducerClient(broker)
+	producer := GetKafkaProducerClient(broker)
 
 	message := &sarama.ProducerMessage{
 		Topic: topic,
@@ -59,6 +61,7 @@ func SendKafkaProducerMessage(broker string, topic string, key string, data stri
 
 // consumer
 func HandleKafkaConsumerClient() {
+	kafkaConfig := GetZookeeperStringConfig()
 	result := make(map[string]sarama.Consumer, len(kafkaConfig))
 
 	for k, v := range kafkaConfig {
@@ -79,14 +82,14 @@ func createKafkaConsumerClient(kfkConf []string) sarama.Consumer {
 	return consumer
 }
 
-func getKafkaConsumerClient(key string) sarama.Consumer {
+func GetKafkaConsumerClient(key string) sarama.Consumer {
 	result := fullConsumerKafka[key]
 	return result
 }
 
 // demo
 func HandlerKafkaConsumerMessage(broker string, topic string) {
-	consumer := getKafkaConsumerClient(broker)
+	consumer := GetKafkaConsumerClient(broker)
 	partitionList, err := consumer.Partitions(topic)
 
 	if err != nil {

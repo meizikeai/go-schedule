@@ -68,6 +68,8 @@ func GET(reqUrl string, reqParams types.MapStringString, headers types.MapString
 	record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(result))
 	log.Info(record)
 
+	defer res.Body.Close()
+
 	return result, err
 }
 

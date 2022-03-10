@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"go-schedule/conf"
 	"go-schedule/libs/types"
 
 	"github.com/samuel/go-zookeeper/zk"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -62,6 +62,15 @@ func HandleZookeeperConfig() {
 
 			for key, val := range v {
 				back := getZookeeperGet(pool, val)
+				config[key] = back
+			}
+
+			zookeeperString = config
+		} else if k == "kafka" {
+			config := make(types.MapStringString)
+
+			for key, val := range v {
+				back := getKafkaZookeeperChildren(pool, key, val)
 				config[key] = back
 			}
 
@@ -222,6 +231,29 @@ func getServerZookeeperChildren(pool *zk.Conn, key string, path string) string {
 
 	i := GetRandmod(len(back))
 	result = back[i]
+
+	return result
+}
+
+func getKafkaZookeeperChildren(pool *zk.Conn, key string, path string) string {
+	var result string
+
+	back, _, err := pool.Get(path)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res := string(back)
+	list := strings.Split(res, ",")
+
+	for k, v := range list {
+		if k+1 == len(list) {
+			result += v + ":9092"
+		} else {
+			result += v + ":9092,"
+		}
+	}
 
 	return result
 }

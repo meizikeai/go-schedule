@@ -10,5 +10,8 @@
   },
   "string": {
     "env": "/blued/service/env"
+  },
+  "kafka": {
+    "users.lock": "/blued/backend/ukafka/nezha/bootstrap"
   }
 }

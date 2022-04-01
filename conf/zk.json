@@ -1,17 +1,17 @@
 {
   "mysql": {
-    "activity": "/blued/backend/udb/livedata_activity"
+    "test": "/kiss/love/test"
   },
   "redis": {
-    "users": "/blued/backend/umem/users"
+    "test": "/kiss/love/test"
   },
   "server": {
-    "send": "/blued/service/hermes/send"
+    "test": "/kiss/love/test"
   },
   "string": {
-    "env": "/blued/service/env"
+    "test": "/kiss/love/test"
   },
   "kafka": {
-    "users.lock": "/blued/backend/ukafka/nezha/bootstrap"
+    "test": "/kiss/love/test"
   }
 }

@@ -7,14 +7,12 @@ import (
 )
 
 func init() {
-	tool.HandleZookeeperConfig()
-
-	// not recommended for use
+	// tool.HandleZookeeperConfig()
 	// tool.HandleLocalMysqlConfig()
 	// tool.HandleLocalRedisConfig()
 
-	tool.HandleMySQLClient()
-	tool.HandleRedisClient()
+	// tool.HandleMySQLClient()
+	// tool.HandleRedisClient()
 	// tool.HandleKafkaProducerClient()
 	// tool.HandleKafkaConsumerClient()
 

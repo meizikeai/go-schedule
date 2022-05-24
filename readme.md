@@ -10,13 +10,13 @@ https://github.com/meizikeai/go-schedule.git
 
 #### 项目结构
 
-| 路径          | 描述               | 详情 |
-| ------------- | ---------------------- | ---- |
-| conf          | config                 | --   |
-| libs          | lib                    | --   |
-| models        | mysql / redis          | --   |
-| task          | schedule               | --   |
-| go.mod        | go modules             | --   |
+| 路径   | 描述          | 详情 |
+|--------|---------------|------|
+| conf   | config        | --   |
+| libs   | lib           | --   |
+| models | mysql / redis | --   |
+| task   | schedule      | --   |
+| go.mod | go modules    | --   |
 
 #### 开发环境
 
@@ -42,8 +42,27 @@ https://github.com/meizikeai/go-schedule.git
 
 #### 帮助文档
 
+ `通过以下命令行执行`
+
 ```sh
-# program 为 [program:go-practice] 里配置的值
+# 第一步
+$ cd ~/go-schedule
+$ GOOS=linux GOARCH=amd64 go build -o go-schedule main.go
+
+# 后台运行，关掉终端会停止运行
+$ ~/go-schedule/go-schedule &
+
+# 后台运行，关掉终端也会继续运行
+$ nohup ~/go-schedule/go-schedule &
+
+# 第二步
+$ 执行方法见 帮助文档
+$ 项目配置件 /etc/supervisor/conf.d
+$ 执行项目名 go-schedule
+```
+
+```sh
+# program 为 [program:go-schedule] 里配置的值
 # start、restart、stop、remove、add 都不会载入最新的配置文件
 
 # start      启动程序

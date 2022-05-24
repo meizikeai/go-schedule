@@ -26,7 +26,7 @@ var zookeeperString types.MapStringString
 func HandleZookeeperConfig() {
 	zkList := conf.Release
 
-	mode := os.Getenv("GIN_MODE")
+	mode := GetMODE()
 
 	if mode != "release" {
 		zkList = conf.Test

@@ -57,7 +57,7 @@ func GetRandmod(length int) int64 {
 }
 
 func GetMODE() string {
-	res := os.Getenv("GIN_MODE")
+	res := os.Getenv("GO_MODE")
 
 	if res != "release" {
 		res = "test"

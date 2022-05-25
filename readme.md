@@ -28,13 +28,13 @@ https://github.com/meizikeai/go-schedule.git
 
 #### 项目变量
 
-在测试、线上环境需要设置 `GIN_MODE` 的值来区分相应环境。
+在测试、线上环境需要设置 `GO_MODE` 的值来区分相应环境。
 
-需要在 `～/.zshrc` 里给定 `export GIN_MODE=release/test` 后，程序中通过 `mode := os.Getenv("GIN_MODE")` 获取。
+需要在 `～/.zshrc` 里给定 `export GO_MODE=release/test` 后，程序中通过 `mode := os.Getenv("GO_MODE")` 获取。
 
-如果 `GIN_MODE` 未设定，那么运行的是线上环境。
+如果 `GO_MODE` 未设定，那么运行的是 `test` 环境。
 
-为了区分本地开发，增加 `export GIN_ENV=debug` 环境变量。
+为了进行写日志区分，增加 `export GO_ENV=debug` 环境变量。
 
 #### 自动部署
 

@@ -53,7 +53,7 @@ $ GOOS=linux GOARCH=amd64 go build -o go-schedule main.go
 $ ~/go-schedule/go-schedule &
 
 # 后台运行，关掉终端也会继续运行
-$ nohup ~/go-schedule/go-schedule &
+$ nohup ~/go-schedule/go-schedule > go-schedule.log 2>&1 &
 
 # 第二步
 $ 执行方法见 帮助文档

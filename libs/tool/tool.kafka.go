@@ -87,6 +87,18 @@ func GetKafkaConsumerClient(key string) sarama.Consumer {
 	return result
 }
 
+func CloseKafka() {
+	for _, v := range fullProducerKafka {
+		v.Close()
+	}
+
+	for _, v := range fullConsumerKafka {
+		v.Close()
+	}
+
+	Stdout("Kafka Close")
+}
+
 // demo
 func HandlerKafkaConsumerMessage(broker string, topic string) {
 	consumer := GetKafkaConsumerClient(broker)

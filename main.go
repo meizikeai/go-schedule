@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"go-schedule/libs/log"
 	"go-schedule/libs/tool"
 	"go-schedule/task/test"
@@ -20,6 +22,16 @@ func init() {
 }
 
 func main() {
+	tool.SignalHandler(func() {
+		tool.CloseKafka()
+		tool.CloseMySQL()
+		tool.CloseRedis()
+
+		tool.Stdout("Server Shutdown")
+
+		os.Exit(0)
+	})
+
 	a := tool.HandleCron("*/1 * * * *", func() {
 		test.OneJob()
 		// test.TwoJob()

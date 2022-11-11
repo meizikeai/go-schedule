@@ -131,3 +131,13 @@ func handleRedisClient(addr string, password string, db int) *redis.Client {
 
 	return client
 }
+
+func CloseRedis() {
+	for _, val := range fullDbRedis {
+		for _, v := range val {
+			v.Close()
+		}
+	}
+
+	Stdout("Redis Close")
+}

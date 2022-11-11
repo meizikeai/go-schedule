@@ -17,8 +17,8 @@ import (
 
 var connMySQL = types.ConnMySQLMax{
 	MaxLifetime: 300,
-	MaxIdleConn: 1000,
-	MaxOpenConn: 2000,
+	MaxIdleConn: 300,
+	MaxOpenConn: 600,
 }
 var fullDbMySQL map[string][]*sql.DB
 var mysqlConfig types.FullConfMySQL
@@ -134,15 +134,15 @@ func handleMySQLClient(addr string, username string, password string, database s
 // 连接、读、写超时请安需调整，默认一秒
 func createDSN(addr string, user string, passwd string, dbname string) string {
 	config := mysql.Config{
-		User:             user,                           // Username
-		Passwd:           passwd,                         // Password (requires User)
-		Net:              "tcp",                          // Network type - default: "tcp"
-		Addr:             addr,                           // Network address (requires Net)
-		DBName:           dbname,                         // Database name
-		MaxAllowedPacket: 4194304,                        // Max packet size allowed  - default: 4194304
-		Timeout:          time.Second * time.Duration(3), // Dial timeout
-		ReadTimeout:      time.Second * time.Duration(3), // I/O read timeout
-		WriteTimeout:     time.Second * time.Duration(3), // I/O write timeout
+		User:             user,                            // Username
+		Passwd:           passwd,                          // Password (requires User)
+		Net:              "tcp",                           // Network type - default: "tcp"
+		Addr:             addr,                            // Network address (requires Net)
+		DBName:           dbname,                          // Database name
+		MaxAllowedPacket: 4194304,                         // Max packet size allowed  - default: 4194304
+		Timeout:          time.Second * time.Duration(10), // Dial timeout
+		ReadTimeout:      time.Second * time.Duration(30), // I/O read timeout
+		WriteTimeout:     time.Second * time.Duration(60), // I/O write timeout
 
 		AllowNativePasswords: true, // Allows the native password authentication method - default: true
 		CheckConnLiveness:    true, // Check connections for liveness before using them - default: true
@@ -150,4 +150,14 @@ func createDSN(addr string, user string, passwd string, dbname string) string {
 	}
 
 	return config.FormatDSN()
+}
+
+func CloseMySQL() {
+	for _, val := range fullDbMySQL {
+		for _, v := range val {
+			v.Close()
+		}
+	}
+
+	Stdout("MySQL Close")
 }

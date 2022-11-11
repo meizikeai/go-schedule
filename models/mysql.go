@@ -81,8 +81,8 @@ func GetPersons() (result []Person, err error) {
 			&datetime,
 		)
 
-		// creat, _ := time.ParseInLocation("2006-01-02 15:04:05", datetime, time.Local)
-		// creattime := time.Unix(creat.Unix(), 0).Format("2006-01-02 15:04:05")
+		// creat, _ := time.ParseInLocation(time.RFC3339, datetime, time.Local)
+		// creattime := time.Unix(creat.Unix(), 0).Format(time.RFC3339)
 
 		person.Datetime = datetime
 		result = append(persons, person)

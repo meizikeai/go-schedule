@@ -8,20 +8,15 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"go-schedule/libs/types"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func GET(reqUrl string, reqParams, headers types.MapStringString) ([]byte, error) {
+func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	params := url.Values{}
 	urlPath, err := url.Parse(reqUrl)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
@@ -35,7 +30,6 @@ func GET(reqUrl string, reqParams, headers types.MapStringString) ([]byte, error
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
@@ -54,33 +48,29 @@ func GET(reqUrl string, reqParams, headers types.MapStringString) ([]byte, error
 	res, err := pool.Do(req)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
 	result, err = ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
-	record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(result))
-	log.Info(record)
-
+	// record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(result))
+	// fmt.Println(record)
 	defer res.Body.Close()
 
 	return result, err
 }
 
-func POST(reqUrl string, body interface{}, params, headers types.MapStringString) ([]byte, error) {
+func POST(reqUrl string, body interface{}, params, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)
 	req, err := http.NewRequest(http.MethodPost, reqUrl, bytes.NewBuffer(data))
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
@@ -109,33 +99,30 @@ func POST(reqUrl string, body interface{}, params, headers types.MapStringString
 	res, err := pool.Do(req)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
 	result, err = ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
-	record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
-	log.Info(record)
+	// record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
+	// fmt.Println(record)
 
 	defer res.Body.Close()
 
 	return result, err
 }
 
-func DELETE(reqUrl string, body interface{}, params, headers types.MapStringString) ([]byte, error) {
+func DELETE(reqUrl string, body interface{}, params, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)
 	req, err := http.NewRequest(http.MethodDelete, reqUrl, bytes.NewBuffer(data))
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
@@ -164,19 +151,17 @@ func DELETE(reqUrl string, body interface{}, params, headers types.MapStringStri
 	res, err := pool.Do(req)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
 	result, err = ioutil.ReadAll(res.Body)
 
 	if err != nil {
-		log.Error(err)
 		return result, err
 	}
 
 	record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
-	log.Info(record)
+	fmt.Println(record)
 
 	defer res.Body.Close()
 

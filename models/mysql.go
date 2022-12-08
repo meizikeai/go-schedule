@@ -120,7 +120,7 @@ func GetPerson(email string) (result Person, err error) {
 	return result, err
 }
 
-func UpdatePerson(name string, phone string, email string) (ra int64, err error) {
+func UpdatePerson(name, phone, email string) (ra int64, err error) {
 	pool := tool.GetMySQLClient("default.master")
 
 	row, err := pool.Prepare("UPDATE test_user_info SET name=?, phone=? WHERE id=?")

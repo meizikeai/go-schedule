@@ -118,7 +118,7 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	return db
 }
 
-func handleMySQLClient(addr string, username string, password string, database string) *sql.DB {
+func handleMySQLClient(addr, username, password, database string) *sql.DB {
 	option := types.OutConfMySQL{
 		Addr:     addr,
 		Username: username,
@@ -132,7 +132,7 @@ func handleMySQLClient(addr string, username string, password string, database s
 }
 
 // 连接、读、写超时请安需调整，默认一秒
-func createDSN(addr string, user string, passwd string, dbname string) string {
+func createDSN(addr, user, passwd, dbname string) string {
 	config := mysql.Config{
 		User:             user,                            // Username
 		Passwd:           passwd,                          // Password (requires User)

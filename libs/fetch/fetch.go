@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GET(reqUrl string, reqParams types.MapStringString, headers types.MapStringString) ([]byte, error) {
+func GET(reqUrl string, reqParams, headers types.MapStringString) ([]byte, error) {
 	result := []byte{}
 
 	params := url.Values{}
@@ -73,7 +73,7 @@ func GET(reqUrl string, reqParams types.MapStringString, headers types.MapString
 	return result, err
 }
 
-func POST(reqUrl string, body interface{}, params types.MapStringString, headers types.MapStringString) ([]byte, error) {
+func POST(reqUrl string, body interface{}, params, headers types.MapStringString) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)
@@ -128,7 +128,7 @@ func POST(reqUrl string, body interface{}, params types.MapStringString, headers
 	return result, err
 }
 
-func DELETE(reqUrl string, body interface{}, params types.MapStringString, headers types.MapStringString) ([]byte, error) {
+func DELETE(reqUrl string, body interface{}, params, headers types.MapStringString) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)

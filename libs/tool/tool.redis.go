@@ -114,7 +114,7 @@ func createRedisClient(config types.OutConfRedis) *redis.Client {
 	return db
 }
 
-func handleRedisClient(addr string, password string, db int) *redis.Client {
+func handleRedisClient(addr, password string, db int) *redis.Client {
 	option := types.OutConfRedis{
 		Addr:               addr,
 		Password:           password,

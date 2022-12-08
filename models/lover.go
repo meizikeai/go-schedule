@@ -84,7 +84,7 @@ func GetLoverGift(day string) (result []LoverGift, err error) {
 //   KEY `day` (`day`)
 // ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-func UpdateLoverData(t string, v string, u string) (id int64, err error) {
+func UpdateLoverData(t, v, u string) (id int64, err error) {
 	pool := tool.GetMySQLClient("default.master")
 
 	sql := "INSERT INTO " + t + " (uid,beans,day) VALUES " + v + " ON DUPLICATE KEY UPDATE " + u

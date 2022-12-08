@@ -47,7 +47,7 @@ func GetKafkaProducerClient(key string) sarama.AsyncProducer {
 }
 
 // demo
-func SendKafkaProducerMessage(broker string, topic string, key string, data string) {
+func SendKafkaProducerMessage(broker, topic, key, data string) {
 	producer := GetKafkaProducerClient(broker)
 
 	message := &sarama.ProducerMessage{
@@ -100,7 +100,7 @@ func CloseKafka() {
 }
 
 // demo
-func HandlerKafkaConsumerMessage(broker string, topic string) {
+func HandlerKafkaConsumerMessage(broker, topic string) {
 	consumer := GetKafkaConsumerClient(broker)
 	partitionList, err := consumer.Partitions(topic)
 

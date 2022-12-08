@@ -220,7 +220,7 @@ func getRedisZookeeperChildren(pool *zk.Conn, path string) types.ConfRedis {
 	return result
 }
 
-func getServerZookeeperChildren(pool *zk.Conn, key string, path string) string {
+func getServerZookeeperChildren(pool *zk.Conn, key, path string) string {
 	var result string
 
 	back, _, err := pool.Children(path)
@@ -235,7 +235,7 @@ func getServerZookeeperChildren(pool *zk.Conn, key string, path string) string {
 	return result
 }
 
-func getKafkaZookeeperChildren(pool *zk.Conn, key string, path string) string {
+func getKafkaZookeeperChildren(pool *zk.Conn, key, path string) string {
 	var result string
 
 	back, _, err := pool.Get(path)

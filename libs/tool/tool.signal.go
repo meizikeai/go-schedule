@@ -40,7 +40,7 @@ func SignalHandler(callback func()) {
 }
 
 func Stdout(format string, v ...interface{}) {
-	log := fmt.Sprintf("%s %s %s \n", "[hermes-connector-go]", time.Now().Format("2006-01-02 15:04:05"), format)
+	log := fmt.Sprintf("%s %s %s \n", time.Now().Format("2006-01-02 15:04:05"), "[go-schedule]", format)
 
 	if _, err := fmt.Fprintf(os.Stdout, log, v...); err != nil {
 		panic(err)

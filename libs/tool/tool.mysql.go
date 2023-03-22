@@ -16,9 +16,9 @@ import (
 )
 
 var connMySQL = types.ConnMySQLMax{
-	MaxLifetime: 300,
-	MaxIdleConn: 300,
-	MaxOpenConn: 600,
+	MaxOpenConns:    1000,
+	MaxIdleConns:    1000,
+	ConnmaxLifetime: 10,
 }
 var fullDbMySQL map[string][]*sql.DB
 var mysqlConfig types.FullConfMySQL
@@ -105,9 +105,9 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 		log.Fatal(err)
 	}
 
-	db.SetConnMaxLifetime(time.Second * time.Duration(connMySQL.MaxLifetime))
-	db.SetMaxIdleConns(connMySQL.MaxIdleConn)
-	db.SetMaxOpenConns(connMySQL.MaxOpenConn)
+	db.SetMaxOpenConns(connMySQL.MaxOpenConns)
+	db.SetMaxIdleConns(connMySQL.MaxIdleConns)
+	db.SetConnMaxLifetime(time.Second * time.Duration(connMySQL.ConnmaxLifetime))
 
 	err = db.Ping()
 

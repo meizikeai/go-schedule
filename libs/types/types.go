@@ -39,7 +39,7 @@ type OutConfRedis struct {
 type FullConfRedis map[string]ConfRedis
 
 type ConnMySQLMax struct {
-	MaxLifetime int64 `json:"MaxLifetime"`
-	MaxIdleConn int   `json:"MaxIdleConn"`
-	MaxOpenConn int   `json:"MaxOpenConn"`
+	MaxOpenConns    int   `json:"max_open_conns"`
+	MaxIdleConns    int   `json:"max_idle_conns"`
+	ConnmaxLifetime int64 `json:"conn_max_life_time"`
 }

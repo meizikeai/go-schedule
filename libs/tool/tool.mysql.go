@@ -16,8 +16,8 @@ import (
 )
 
 var connMySQL = types.ConnMySQLMax{
-	MaxOpenConns:    1000,
-	MaxIdleConns:    1000,
+	MaxOpenConns:    500,
+	MaxIdleConns:    250,
 	ConnmaxLifetime: 10,
 }
 var fullDbMySQL map[string][]*sql.DB

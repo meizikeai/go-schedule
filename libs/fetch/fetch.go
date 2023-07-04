@@ -3,7 +3,6 @@ package fetch
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -59,6 +58,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 
 	// record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(result))
 	// fmt.Println(record)
+
 	defer res.Body.Close()
 
 	return result, err
@@ -160,8 +160,8 @@ func DELETE(reqUrl string, body interface{}, params, headers map[string]string) 
 		return result, err
 	}
 
-	record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
-	fmt.Println(record)
+	// record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
+	// fmt.Println(record)
 
 	defer res.Body.Close()
 

@@ -12,7 +12,7 @@ https://github.com/meizikeai/go-schedule.git
 
 | 路径   | 描述          | 详情 |
 |--------|---------------|------|
-| conf   | config        | --   |
+| config | config        | --   |
 | libs   | lib           | --   |
 | models | mysql / redis | --   |
 | task   | schedule      | --   |
@@ -104,12 +104,3 @@ $ supervisorctl status
 
   + https://gobyexample.com
   + https://gowebexamples.com
-
-**学习 Go 语言**
-
-  + https://github.com/astaxie/build-web-application-with-golang/blob/master/zh/preface.md
-  + https://github.com/unknwon/the-way-to-go_ZH_CN/blob/master/eBook/directory.md
-
-**Go 操作 Redis 实战**
-
-  + https://www.cnblogs.com/itbsl/p/14198111.html

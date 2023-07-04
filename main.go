@@ -10,8 +10,6 @@ import (
 
 func init() {
 	// tool.HandleZookeeperConfig()
-	// tool.HandleLocalMysqlConfig()
-	// tool.HandleLocalRedisConfig()
 
 	// tool.HandleMySQLClient()
 	// tool.HandleRedisClient()

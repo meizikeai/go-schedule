@@ -1,22 +1,16 @@
 package tool
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
-	"go-schedule/conf"
+	"go-schedule/config"
 	"go-schedule/libs/types"
 
 	"github.com/go-zookeeper/zk"
 	log "github.com/sirupsen/logrus"
 )
-
-type confZookeeper map[string]map[string]string
 
 var zookeeperMySQL types.FullConfMySQL
 var zookeeperRedis types.FullConfRedis
@@ -24,19 +18,12 @@ var zookeeperServer types.MapStringString
 var zookeeperString types.MapStringString
 
 func HandleZookeeperConfig() {
-	zkList := conf.Release
-
-	mode := GetMODE()
-
-	if mode != "release" {
-		zkList = conf.Test
-	}
-
-	pool := newZookeeperConnect(zkList)
+	servers := config.GetZookeeperServers()
+	pool := newZookeeperConnect(servers)
 
 	defer pool.Close()
 
-	option := readZookeeperConfig()
+	option := config.GetZookeeperConfig()
 
 	for k, v := range option {
 		if k == "mysql" {
@@ -104,28 +91,8 @@ func getZookeeperRedisConfig() types.FullConfRedis {
 	return zookeeperRedis
 }
 
-func readZookeeperConfig() confZookeeper {
-	var config confZookeeper
-
-	pwd, _ := os.Getwd()
-	address := filepath.Join(pwd, "/conf/zk.json")
-	res, err := ioutil.ReadFile(address)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = json.Unmarshal(res, &config)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return config
-}
-
-func newZookeeperConnect(zkList []string) (pool *zk.Conn) {
-	pool, _, err := zk.Connect(zkList, 20*time.Second)
+func newZookeeperConnect(servers []string) (pool *zk.Conn) {
+	pool, _, err := zk.Connect(servers, 20*time.Second)
 
 	if err != nil {
 		log.Fatal(err)

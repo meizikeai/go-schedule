@@ -4,11 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"math/big"
-	"os"
+	"regexp"
+	"strconv"
 
-	"go-schedule/libs/types"
-
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,6 +25,15 @@ func HandleCron(time string, fn func()) *cron.Cron {
 	return res
 }
 
+func Contain(arr []string, element string) bool {
+	for _, v := range arr {
+		if v == element {
+			return true
+		}
+	}
+	return false
+}
+
 func MarshalJson(date interface{}) []byte {
 	res, err := json.Marshal(date)
 
@@ -37,8 +44,8 @@ func MarshalJson(date interface{}) []byte {
 	return res
 }
 
-func UnmarshalJson(date string) types.MapStringInterface {
-	var res types.MapStringInterface
+func UnmarshalJson(date string) map[string]interface{} {
+	var res map[string]interface{}
 
 	_ = json.Unmarshal([]byte(date), &res)
 
@@ -56,12 +63,103 @@ func GetRandmod(length int) int64 {
 	return res.Int64()
 }
 
-func GetMODE() string {
-	res := os.Getenv("GO_MODE")
+func IntToString(value int64) string {
+	v := strconv.FormatInt(value, 10)
 
-	if res != "release" {
-		res = "test"
+	return v
+}
+
+func StringToInt(value string) int64 {
+	res, err := strconv.ParseInt(value, 10, 64)
+
+	if err != nil {
+		res = 0
 	}
 
 	return res
+}
+
+func CheckPassword(password string, min, max int) int {
+	level := 0
+
+	if len(password) < min {
+		return -1
+	}
+
+	if len(password) > max {
+		return 5
+	}
+
+	patternList := []string{`[0-9]+`, `[a-z]+`, `[A-Z]+`, `[~!@#$%^&amp;*?_-]+`}
+
+	for _, pattern := range patternList {
+		match, _ := regexp.MatchString(pattern, password)
+
+		if match == true {
+			level++
+		}
+	}
+
+	return level
+}
+
+var compileRegex = regexp.MustCompile(`\D`)
+
+func ClearNotaNumber(str string) string {
+	return compileRegex.ReplaceAllString(str, "")
+}
+
+func HandleEscape(source string) string {
+	var j int = 0
+
+	if len(source) == 0 {
+		return ""
+	}
+
+	tempStr := source[:]
+	desc := make([]byte, len(tempStr)*2)
+
+	for i := 0; i < len(tempStr); i++ {
+		flag := false
+		var escape byte
+
+		switch tempStr[i] {
+		case '\r':
+			flag = true
+			escape = '\r'
+			break
+		case '\n':
+			flag = true
+			escape = '\n'
+			break
+		case '\\':
+			flag = true
+			escape = '\\'
+			break
+		case '\'':
+			flag = true
+			escape = '\''
+			break
+		case '"':
+			flag = true
+			escape = '"'
+			break
+		case '\032':
+			flag = true
+			escape = 'Z'
+			break
+		default:
+		}
+
+		if flag {
+			desc[j] = '\\'
+			desc[j+1] = escape
+			j = j + 2
+		} else {
+			desc[j] = tempStr[i]
+			j = j + 1
+		}
+	}
+
+	return string(desc[0:j])
 }

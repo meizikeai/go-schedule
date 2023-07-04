@@ -2,17 +2,13 @@ package tool
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
-	"os"
 	"runtime"
-	"strings"
 	"time"
 
+	"go-schedule/config"
 	"go-schedule/libs/types"
 
 	"github.com/go-redis/redis/v8"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -26,30 +22,6 @@ var connRedis = types.OutConfRedis{
 	IdleCheckFrequency: 60,
 }
 var fullDbRedis map[string][]*redis.Client
-var redisConfig types.FullConfRedis
-
-func HandleLocalRedisConfig() {
-	var config types.FullConfRedis
-
-	pwd, _ := os.Getwd()
-	mode := GetMODE()
-
-	address := strings.Join([]string{pwd, "/conf/", mode, ".redis.json"}, "")
-
-	res, err := ioutil.ReadFile(address)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = json.Unmarshal(res, &config)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	redisConfig = config
-}
 
 func GetRedisClient(key string) *redis.Client {
 	result := fullDbRedis[key]
@@ -59,34 +31,20 @@ func GetRedisClient(key string) *redis.Client {
 }
 
 func HandleRedisClient() {
-	config := make(map[string][]*redis.Client)
+	client := make(map[string][]*redis.Client)
 
-	zookeeper := getZookeeperRedisConfig()
-	local := getLocalRedisConfig()
-
-	for k, v := range zookeeper {
-		key := k + ".master"
-
-		for _, addr := range v.Master {
-			clients := handleRedisClient(addr, v.Password, v.Db)
-			config[key] = append(config[key], clients)
-		}
-	}
+	local := config.GetRedisConfig()
 
 	for k, v := range local {
 		key := k + ".master"
 
 		for _, addr := range v.Master {
 			clients := handleRedisClient(addr, v.Password, v.Db)
-			config[key] = append(config[key], clients)
+			client[key] = append(client[key], clients)
 		}
 	}
 
-	fullDbRedis = config
-}
-
-func getLocalRedisConfig() types.FullConfRedis {
-	return redisConfig
+	fullDbRedis = client
 }
 
 func createRedisClient(config types.OutConfRedis) *redis.Client {

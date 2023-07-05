@@ -10,14 +10,14 @@ var zookeeperTest = []string{"127.0.0.1:2181"}
 var zookeeperRelease = []string{"127.0.0.1:2181"}
 
 var mysqlConfig = map[string]types.ConfMySQL{
-	"ailab-test": {
+	"default-test": {
 		Master:   []string{"127.0.0.1:3306"},
 		Slave:    []string{"127.0.0.1:3306"},
 		Username: "test",
 		Password: "yintai@123",
 		Database: "test",
 	},
-	"ailab-release": {
+	"default-release": {
 		Master:   []string{"127.0.0.1:3306"},
 		Slave:    []string{"127.0.0.1:3306", "127.0.0.1:3306"},
 		Username: "test",
@@ -27,12 +27,12 @@ var mysqlConfig = map[string]types.ConfMySQL{
 }
 
 var redisConfig = map[string]types.ConfRedis{
-	"ailab-test": {
+	"default-test": {
 		Master:   []string{"127.0.0.1:6379"},
 		Password: "",
 		Db:       0,
 	},
-	"ailab-release": {
+	"default-release": {
 		Master:   []string{"127.0.0.1:6379"},
 		Password: "",
 		Db:       0,
@@ -57,10 +57,20 @@ var zookeeperConfig = types.ConfZookeeper{
 	},
 }
 
+func getMode() string {
+	mode := os.Getenv("GO_MODE")
+
+	if mode == "" {
+		mode = "test"
+	}
+
+	return mode
+}
+
 func isProduction() bool {
 	result := false
 
-	mode := os.Getenv("ALP_MODE")
+	mode := os.Getenv("GO_MODE")
 
 	if mode == "release" {
 		result = true
@@ -70,32 +80,30 @@ func isProduction() bool {
 }
 
 func GetMySQLConfig() types.FullConfMySQL {
-	env := isProduction()
+	mode := getMode()
+	result := types.FullConfMySQL{}
 
-	confMySQL := mysqlConfig["ailab-release"]
-
-	if env == false {
-		confMySQL = mysqlConfig["ailab-test"]
+	data := []string{
+		"default",
 	}
 
-	result := types.FullConfMySQL{
-		"default": confMySQL,
+	for _, v := range data {
+		result[v] = mysqlConfig[v+"-"+mode]
 	}
 
 	return result
 }
 
 func GetRedisConfig() types.FullConfRedis {
-	env := isProduction()
+	mode := getMode()
+	result := types.FullConfRedis{}
 
-	confRedis := redisConfig["ailab-release"]
-
-	if env == false {
-		confRedis = redisConfig["ailab-test"]
+	data := []string{
+		"default",
 	}
 
-	result := types.FullConfRedis{
-		"default": confRedis,
+	for _, v := range data {
+		result[v] = redisConfig[v+"-"+mode]
 	}
 
 	return result

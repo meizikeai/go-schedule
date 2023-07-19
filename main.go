@@ -5,7 +5,7 @@ import (
 
 	"go-schedule/libs/log"
 	"go-schedule/libs/tool"
-	"go-schedule/task/test"
+	"go-schedule/task"
 )
 
 func init() {
@@ -30,22 +30,12 @@ func main() {
 		os.Exit(0)
 	})
 
-	a := tool.HandleCron("*/1 * * * *", func() {
-		test.OneJob()
-		// test.TwoJob()
-		// test.HandleLoverGift()
-	})
+	// running
+	task.HandleRun()
 
-	defer a.Stop()
-
-	b := tool.HandleCron("*/1 * * * *", func() {
-		test.ThreeJob()
-		test.FourJob()
-		// test.FiveJob()
-		// test.SixJob()
-	})
-
-	defer b.Stop()
+	// checking
+	check := tool.HandleCron("0 10 */1 * *", task.HandleCheck())
+	defer check.Stop()
 
 	// kafka producer
 	// tool.SendKafkaProducerMessage("broker", "topic", "sync", "test")

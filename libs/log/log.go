@@ -3,50 +3,80 @@ package log
 import (
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
-
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+type Hook struct {
+	defaultLogger *lumberjack.Logger
+	formatter     logrus.Formatter
+	minLevel      logrus.Level
+	loggerByLevel map[logrus.Level]*lumberjack.Logger
+}
+
+func (hook *Hook) Fire(entry *logrus.Entry) error {
+	msg, err := hook.formatter.Format(entry)
+
+	if err != nil {
+		return err
+	}
+
+	if logger, ok := hook.loggerByLevel[entry.Level]; ok {
+		_, err = logger.Write([]byte(msg))
+	} else {
+		_, err = hook.defaultLogger.Write([]byte(msg))
+	}
+
+	return err
+}
+
+func (hook *Hook) Levels() []logrus.Level {
+	return logrus.AllLevels[:hook.minLevel+1]
+}
+
+func getLogger(file string) *lumberjack.Logger {
+	template := &lumberjack.Logger{
+		Filename:   file,
+		MaxSize:    100,   // 日志文件在轮转之前的最大大小，默认 100 MB
+		MaxBackups: 10,    // 保留旧日志文件的最大数量
+		MaxAge:     15,    // 保留旧日志文件的最大天数
+		Compress:   false, // 是否使用 gzip 对日志文件进行压缩归档
+		LocalTime:  true,  // 是否使用本地时间，默认 UTC 时间
+	}
+
+	return template
+}
+
+func createHook(outFile, errFile string) *Hook {
+	outlog := getLogger(outFile)
+	errlog := getLogger(errFile)
+
+	hook := Hook{
+		defaultLogger: outlog,
+		minLevel:      logrus.InfoLevel,
+		formatter:     &logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"},
+		loggerByLevel: map[logrus.Level]*lumberjack.Logger{
+			logrus.ErrorLevel: errlog,
+		},
+	}
+
+	return &hook
+}
 
 func HandleLogger(app string) {
 	pwd, _ := os.Getwd()
 	mode := os.Getenv("GO_ENV")
 
-	infoPath := filepath.Join("/data/logs/", app, "/info.log")
-	errorPath := filepath.Join("/data/logs/", app, "/error.log")
+	outFile := filepath.Join("/data/logs/", app, "/out.log")
+	errFile := filepath.Join("/data/logs/", app, "/error.log")
 
 	if mode == "debug" {
-		infoPath = pwd + "/logs/info.log"
-		errorPath = pwd + "/logs/error.log"
+		outFile = pwd + "/logs/out.log"
+		errFile = pwd + "/logs/error.log"
 	}
 
-	infoer, _ := rotatelogs.New(
-		infoPath+".%Y-%m-%d",
-		rotatelogs.WithLinkName(infoPath),
-		rotatelogs.WithMaxAge(15*24*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
+	hook := createHook(outFile, errFile)
 
-	errorer, _ := rotatelogs.New(
-		errorPath+".%Y-%m-%d",
-		rotatelogs.WithLinkName(errorPath),
-		rotatelogs.WithMaxAge(15*24*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
-
-	writerMap := lfshook.WriterMap{
-		logrus.DebugLevel: infoer,
-		logrus.InfoLevel:  infoer,
-		logrus.WarnLevel:  infoer,
-		logrus.ErrorLevel: errorer,
-		logrus.FatalLevel: errorer,
-		logrus.PanicLevel: errorer,
-	}
-
-	logrus.AddHook(lfshook.NewHook(writerMap, &logrus.JSONFormatter{
-		TimestampFormat: "2006-01-02 15:04:05",
-	}))
+	logrus.AddHook(hook)
 }

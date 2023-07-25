@@ -2,24 +2,21 @@ package tool
 
 import (
 	"fmt"
+	"go-schedule/config"
 	"strings"
 
 	"github.com/IBM/sarama"
 )
-
-// var kafkaConfig = map[string]string{
-// 	"broker": "127.0.0.1:9092,127.0.0.1:9092,127.0.0.1:9092",
-// }
 
 var fullProducerKafka map[string]sarama.AsyncProducer
 var fullConsumerKafka map[string]sarama.Consumer
 
 // producer
 func HandleKafkaProducerClient() {
-	kafkaConfig := GetZookeeperStringConfig()
-	result := make(map[string]sarama.AsyncProducer, len(kafkaConfig))
+	config := config.GetKafkaConfig()
+	result := make(map[string]sarama.AsyncProducer, len(config))
 
-	for k, v := range kafkaConfig {
+	for k, v := range config {
 		addr := strings.Split(v, ",")
 		result[k] = createKafkaProducerClient(addr)
 	}
@@ -61,10 +58,10 @@ func SendKafkaProducerMessage(broker, topic, key, data string) {
 
 // consumer
 func HandleKafkaConsumerClient() {
-	kafkaConfig := GetZookeeperStringConfig()
-	result := make(map[string]sarama.Consumer, len(kafkaConfig))
+	config := config.GetKafkaConfig()
+	result := make(map[string]sarama.Consumer, len(config))
 
-	for k, v := range kafkaConfig {
+	for k, v := range config {
 		addr := strings.Split(v, ",")
 		result[k] = createKafkaConsumerClient(addr)
 	}
@@ -96,7 +93,7 @@ func CloseKafka() {
 		v.Close()
 	}
 
-	Stdout("Kafka Close")
+	Stdout("Kafka is Close")
 }
 
 // demo

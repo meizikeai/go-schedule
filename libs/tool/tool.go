@@ -3,27 +3,11 @@ package tool
 import (
 	"crypto/rand"
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"regexp"
 	"strconv"
-
-	"github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
 )
-
-func HandleCron(time string, fn func()) *cron.Cron {
-	res := cron.New()
-
-	_, err := res.AddFunc(time, fn)
-
-	if err != nil {
-		log.Error(err)
-	}
-
-	res.Start()
-
-	return res
-}
 
 func Contain(arr []string, element string) bool {
 	for _, v := range arr {
@@ -38,7 +22,7 @@ func MarshalJson(date interface{}) []byte {
 	res, err := json.Marshal(date)
 
 	if err != nil {
-		log.Error(err)
+		fmt.Println(err)
 	}
 
 	return res

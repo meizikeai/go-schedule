@@ -9,10 +9,10 @@ import (
 )
 
 func init() {
-	// tool.HandleZookeeperConfig()
-
 	// tool.HandleMySQLClient()
 	// tool.HandleRedisClient()
+
+	// tool.HandleElasticSearchClient()
 	// tool.HandleKafkaProducerClient()
 	// tool.HandleKafkaConsumerClient()
 
@@ -21,9 +21,10 @@ func init() {
 
 func main() {
 	tool.SignalHandler(func() {
-		tool.CloseKafka()
 		tool.CloseMySQL()
 		tool.CloseRedis()
+		// tool.CloseKafka()
+		// tool.CloseElasticSearch()
 
 		tool.Stdout("Server Shutdown")
 

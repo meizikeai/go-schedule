@@ -44,4 +44,16 @@ type ConnMySQLMax struct {
 	ConnmaxLifetime int64 `json:"conn_max_life_time"`
 }
 
-type ConfZookeeper map[string]map[string]string
+type ConfElasticSearch struct {
+	Address  []string `json:"address"`
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+}
+
+type FullConfElasticSearch map[string]ConfElasticSearch
+
+type ConfEtcd struct {
+	Address  []string `json:"address"`
+	Username string   `json:"username"`
+	Password string   `json:"password"`
+}

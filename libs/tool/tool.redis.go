@@ -9,7 +9,6 @@ import (
 	"go-schedule/libs/types"
 
 	"github.com/go-redis/redis/v8"
-	log "github.com/sirupsen/logrus"
 )
 
 var connRedis = types.OutConfRedis{
@@ -66,7 +65,7 @@ func createRedisClient(config types.OutConfRedis) *redis.Client {
 	_, err := db.Ping(context.Background()).Result()
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return db
@@ -97,5 +96,5 @@ func CloseRedis() {
 		}
 	}
 
-	Stdout("Redis Close")
+	Stdout("Redis is Close")
 }

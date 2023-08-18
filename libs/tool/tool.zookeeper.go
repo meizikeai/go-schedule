@@ -55,14 +55,14 @@ func (z *zookeeper) Close() {
 }
 
 // demo - get redis config
-func (z *zookeeper) GetZookeeperRedisConfig(name, path string) types.FullConfRedis {
+func (z *zookeeper) GetZookeeperRedisConfig(name, path string) map[string]types.ConfRedis {
 	redis := types.ConfRedis{}
 
 	back := z.Children(path)
 
 	redis.Master = back
 
-	result := types.FullConfRedis{
+	result := map[string]types.ConfRedis{
 		name: redis,
 	}
 

@@ -15,8 +15,8 @@ var redisConfig = map[string]types.ConfRedis{
 	},
 }
 
-func GetRedisConfig() types.FullConfRedis {
-	result := types.FullConfRedis{}
+func GetRedisConfig() map[string]types.ConfRedis {
+	result := map[string]types.ConfRedis{}
 
 	data := []string{
 		"default",

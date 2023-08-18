@@ -15,9 +15,8 @@ var elasticSearchConfig = map[string]types.ConfElasticSearch{
 	},
 }
 
-func GetElasticSearchConfig() types.FullConfElasticSearch {
-
-	result := types.FullConfElasticSearch{}
+func GetElasticSearchConfig() map[string]types.ConfElasticSearch {
+	result := map[string]types.ConfElasticSearch{}
 
 	data := []string{
 		"default",

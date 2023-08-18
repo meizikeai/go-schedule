@@ -3,7 +3,7 @@ package fetch
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -50,7 +50,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 		return result, err
 	}
 
-	result, err = ioutil.ReadAll(res.Body)
+	result, err = io.ReadAll(res.Body)
 
 	if err != nil {
 		return result, err
@@ -102,7 +102,7 @@ func POST(reqUrl string, body interface{}, params, headers map[string]string) ([
 		return result, err
 	}
 
-	result, err = ioutil.ReadAll(res.Body)
+	result, err = io.ReadAll(res.Body)
 
 	if err != nil {
 		return result, err
@@ -154,7 +154,7 @@ func DELETE(reqUrl string, body interface{}, params, headers map[string]string) 
 		return result, err
 	}
 
-	result, err = ioutil.ReadAll(res.Body)
+	result, err = io.ReadAll(res.Body)
 
 	if err != nil {
 		return result, err

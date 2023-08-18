@@ -11,6 +11,7 @@ import (
 func init() {
 	// tool.HandleMySQLClient()
 	// tool.HandleRedisClient()
+	// tool.HandleMongodbClient()
 
 	// tool.HandleElasticSearchClient()
 	// tool.HandleKafkaProducerClient()
@@ -23,6 +24,7 @@ func main() {
 	tool.SignalHandler(func() {
 		tool.CloseMySQL()
 		tool.CloseRedis()
+		// tool.CloseMongoDB()
 		// tool.CloseKafka()
 		// tool.CloseElasticSearch()
 

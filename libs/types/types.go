@@ -16,7 +16,6 @@ type OutConfMySQL struct {
 	Password string `json:"password"`
 	Database string `json:"database"`
 }
-type FullConfMySQL map[string]ConfMySQL
 
 type ConfRedis struct {
 	Master   []string `json:"master"`
@@ -36,7 +35,6 @@ type OutConfRedis struct {
 	IdleTimeout        int    `json:"idle_timeout"`
 	IdleCheckFrequency int    `json:"idle_check_frequency"`
 }
-type FullConfRedis map[string]ConfRedis
 
 type ConnMySQLMax struct {
 	MaxOpenConns    int   `json:"max_open_conns"`
@@ -49,8 +47,6 @@ type ConfElasticSearch struct {
 	Username string   `json:"username"`
 	Password string   `json:"password"`
 }
-
-type FullConfElasticSearch map[string]ConfElasticSearch
 
 type ConfEtcd struct {
 	Address  []string `json:"address"`

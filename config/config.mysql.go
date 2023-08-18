@@ -19,8 +19,8 @@ var mysqlConfig = map[string]types.ConfMySQL{
 	},
 }
 
-func GetMySQLConfig() types.FullConfMySQL {
-	result := types.FullConfMySQL{}
+func GetMySQLConfig() map[string]types.ConfMySQL {
+	result := map[string]types.ConfMySQL{}
 
 	data := []string{
 		"default",

@@ -16,9 +16,8 @@ func getMode() string {
 }
 
 func isProduction() bool {
+	mode := getMode()
 	result := false
-
-	mode := os.Getenv("GO_MODE")
 
 	if mode == "release" {
 		result = true

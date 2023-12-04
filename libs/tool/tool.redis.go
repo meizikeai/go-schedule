@@ -44,6 +44,8 @@ func HandleRedisClient() {
 	}
 
 	fullDbRedis = client
+
+	Stdout("Redis is Connected")
 }
 
 func createRedisClient(config types.OutConfRedis) *redis.Client {

@@ -33,6 +33,8 @@ func HandleElasticSearchClient() {
 	}
 
 	fullElasticSearch = client
+
+	Stdout("ElasticSearch is Connected")
 }
 
 func createElasticSearchClient(address []string, username, password string) *elasticsearch.Client {
@@ -68,7 +70,7 @@ func createElasticSearchClient(address []string, username, password string) *ela
 func CloseElasticSearch() {
 	// for _, val := range fullElasticSearch {
 	// 	for _, v := range val {
-	// 		// 没找到 close 方法
+	// 		// Can't find a way to close it
 	// 		v.Close()
 	// 	}
 	// }

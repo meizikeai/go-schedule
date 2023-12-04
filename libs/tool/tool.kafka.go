@@ -22,6 +22,8 @@ func HandleKafkaProducerClient() {
 	}
 
 	fullProducerKafka = result
+
+	Stdout("Kafka is Connected")
 }
 
 func createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {

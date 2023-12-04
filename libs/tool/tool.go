@@ -5,8 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
+
+	mathrand "math/rand"
 )
 
 func Contain(arr []string, element string) bool {
@@ -146,4 +151,71 @@ func HandleEscape(source string) string {
 	}
 
 	return string(desc[0:j])
+}
+
+func GenerateRandomNumber(start int, end int, count int) string {
+	if end < start || (end-start) < count {
+		return ""
+	}
+
+	result := make([]string, 0)
+	r := mathrand.New(mathrand.NewSource(time.Now().UnixNano()))
+
+	for len(result) < count {
+		r := r.Intn((end - start)) + start
+		num := IntToString(int64(r))
+
+		exist := false
+
+		for _, v := range result {
+			if v == num {
+				exist = true
+				break
+			}
+		}
+
+		if exist == false {
+			result = append(result, num)
+		}
+	}
+
+	return strings.Join(result, "")
+}
+
+func RemoveDuplicateElement(strs []string) []string {
+	result := make([]string, 0, len(strs))
+	temp := map[string]struct{}{}
+
+	for _, item := range strs {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+
+	return result
+}
+
+func IsSlice(v interface{}) bool {
+	kind := reflect.ValueOf(v).Kind()
+
+	if kind == reflect.Slice || kind == reflect.Array {
+		return true
+	}
+
+	return false
+}
+
+func StringToArray(data string) []string {
+	result := []string{}
+
+	if len(data) > 0 {
+		result = strings.Split(data, ",")
+	}
+
+	return result
+}
+
+func GetTime() string {
+	return time.Now().Format("2006-01-02 15:04:05")
 }

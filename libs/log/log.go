@@ -38,25 +38,27 @@ func (hook *Hook) Levels() []logrus.Level {
 func getLogger(file string) *lumberjack.Logger {
 	template := &lumberjack.Logger{
 		Filename:   file,
-		MaxSize:    100,   // 日志文件在轮转之前的最大大小，默认 100 MB
-		MaxBackups: 10,    // 保留旧日志文件的最大数量
-		MaxAge:     15,    // 保留旧日志文件的最大天数
-		Compress:   false, // 是否使用 gzip 对日志文件进行压缩归档
-		LocalTime:  true,  // 是否使用本地时间，默认 UTC 时间
+		MaxSize:    100,   // Maximum log file split size, default 100 MB
+		MaxBackups: 10,    // Maximum number of old log files to keep
+		MaxAge:     15,    // Maximum number of days to keep old log files
+		Compress:   false, // Whether to use gzip to compress and archive log files
+		LocalTime:  true,  // Whether to use local time, default UTC time
 	}
 
 	return template
 }
 
-func createHook(outFile, errFile string) *Hook {
+func createHook(traFile, outFile, errFile string) *Hook {
+	tralog := getLogger(traFile)
 	outlog := getLogger(outFile)
 	errlog := getLogger(errFile)
 
 	hook := Hook{
 		defaultLogger: outlog,
-		minLevel:      logrus.InfoLevel,
+		minLevel:      logrus.TraceLevel,
 		formatter:     &logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"},
 		loggerByLevel: map[logrus.Level]*lumberjack.Logger{
+			logrus.TraceLevel: tralog,
 			logrus.ErrorLevel: errlog,
 		},
 	}
@@ -68,15 +70,18 @@ func HandleLogger(app string) {
 	pwd, _ := os.Getwd()
 	mode := os.Getenv("GO_ENV")
 
+	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 	outFile := filepath.Join("/data/logs/", app, "/out.log")
 	errFile := filepath.Join("/data/logs/", app, "/error.log")
 
 	if mode == "debug" {
+		traFile = pwd + "/logs/trace.log"
 		outFile = pwd + "/logs/out.log"
 		errFile = pwd + "/logs/error.log"
 	}
 
-	hook := createHook(outFile, errFile)
+	hook := createHook(traFile, outFile, errFile)
 
+	logrus.SetLevel(logrus.TraceLevel)
 	logrus.AddHook(hook)
 }

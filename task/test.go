@@ -9,12 +9,11 @@ import (
 
 func HandleRun() {
 	pid := os.Getpid()
-	log.Info(fmt.Sprintf("process id %v, go-schedule is working...", pid))
-	// log.Error("this is a test")
+	log.Info(fmt.Sprintf("The process id of the service is %v", pid))
 }
 
 func HandleCheck() func() {
 	return func() {
-		log.Info("cron is running...")
+		log.Info("Scheduled task is running...")
 	}
 }

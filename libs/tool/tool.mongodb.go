@@ -44,6 +44,8 @@ func HandleMongodbClient() {
 	}
 
 	fullDbMongoDB = client
+
+	Stdout("MongoDB is Connected")
 }
 
 func createMongodbClient(uri string) *mongo.Client {

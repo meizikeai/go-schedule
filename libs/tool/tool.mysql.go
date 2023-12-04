@@ -45,9 +45,11 @@ func HandleMySQLClient() {
 	}
 
 	fullDbMySQL = client
+
+	Stdout("MySQL is Connected")
 }
 
-// timeout、readTimeout、writeTimeout default 1s
+// Timeout, read timeout, write timeout defaults to 1s
 func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	dsn := createDSN(config.Addr, config.Username, config.Password, config.Database)
 	db, err := sql.Open("mysql", dsn)
@@ -82,7 +84,7 @@ func handleMySQLClient(addr, username, password, database string) *sql.DB {
 	return client
 }
 
-// 连接、读、写超时请安需调整，默认一秒
+// Please adjust the connection, read, and write timeouts. The default is 1s.
 func createDSN(addr, user, passwd, dbname string) string {
 	config := mysql.Config{
 		User:             user,                            // Username

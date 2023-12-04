@@ -28,7 +28,7 @@ func main() {
 		// tool.CloseKafka()
 		// tool.CloseElasticSearch()
 
-		tool.Stdout("Server Shutdown")
+		tool.Stdout("The Service is Shutdown")
 
 		os.Exit(0)
 	})

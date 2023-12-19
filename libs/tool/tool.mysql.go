@@ -87,15 +87,15 @@ func handleMySQLClient(addr, username, password, database string) *sql.DB {
 // Please adjust the connection, read, and write timeouts. The default is 1s.
 func createDSN(addr, user, passwd, dbname string) string {
 	config := mysql.Config{
-		User:             user,                            // Username
-		Passwd:           passwd,                          // Password (requires User)
-		Net:              "tcp",                           // Network type - default: "tcp"
-		Addr:             addr,                            // Network address (requires Net)
-		DBName:           dbname,                          // Database name
-		MaxAllowedPacket: 4194304,                         // Max packet size allowed  - default: 4194304
-		Timeout:          time.Duration(10) * time.Second, // Dial timeout
-		ReadTimeout:      time.Duration(5) * time.Second,  // I/O read timeout
-		WriteTimeout:     time.Duration(5) * time.Second,  // I/O write timeout
+		User:             user,                           // Username
+		Passwd:           passwd,                         // Password (requires User)
+		Net:              "tcp",                          // Network type - default: "tcp"
+		Addr:             addr,                           // Network address (requires Net)
+		DBName:           dbname,                         // Database name
+		MaxAllowedPacket: 4194304,                        // Max packet size allowed  - default: 4194304
+		Timeout:          time.Duration(5) * time.Second, // Dial timeout
+		ReadTimeout:      time.Duration(5) * time.Second, // I/O read timeout
+		WriteTimeout:     time.Duration(5) * time.Second, // I/O write timeout
 
 		AllowNativePasswords: true, // Allows the native password authentication method - default: true
 		CheckConnLiveness:    true, // Check connections for liveness before using them - default: true

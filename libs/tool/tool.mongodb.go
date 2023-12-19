@@ -10,47 +10,46 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var fullDbMongoDB map[string][]*mongo.Client
+var fullMongoDB map[string]*mongo.Client
 
-func GetMongoClient() *mongo.Client {
-	mongo := fullDbMongoDB["default.master"]
-	count := GetRandmod(len(mongo))
-
-	result := mongo[count]
-
-	return result
-}
-
-func GetMongoCollection(database, table string) *mongo.Collection {
-	client := GetMongoClient()
+func GetMongoCollection(key, database, table string) *mongo.Collection {
+	client := fullMongoDB[key]
 
 	db := client.Database(database)
-	result := db.Collection(table)
+	collection := db.Collection(table)
 
-	return result
+	return collection
 }
 
-func HandleMongodbClient() {
-	client := make(map[string][]*mongo.Client)
+func HandleMongoDBClient() {
+	clients := make(map[string]*mongo.Client)
 
 	local := config.GetMongodbConfig()
 
-	for key, val := range local {
-		m := key + ".master"
-		for _, v := range val {
-			clients := createMongodbClient(v)
-			client[m] = append(client[m], clients)
-		}
+	for k, v := range local {
+		m := k + ".master"
+		s := k + ".slave"
+
+		master := createMongoDBClient(v.Master)
+		clients[m] = master
+
+		slave := createMongoDBClient(v.Slave)
+		clients[s] = slave
 	}
 
-	fullDbMongoDB = client
+	fullMongoDB = clients
 
 	Stdout("MongoDB is Connected")
 }
 
-func createMongodbClient(uri string) *mongo.Client {
+func createMongoDBClient(uri string) *mongo.Client {
+	ctx, cancel := mongoConfig()
+	defer cancel()
+
 	config := options.Client().ApplyURI(uri)
-	ctx, cancel := getMongoConfig()
+
+	config.SetMaxPoolSize(300)
+	config.SetMinPoolSize(150)
 
 	client, err := mongo.Connect(ctx, config)
 
@@ -64,24 +63,20 @@ func createMongodbClient(uri string) *mongo.Client {
 		panic(err)
 	}
 
-	defer cancel()
-
 	return client
 }
 
-func getMongoConfig() (context.Context, context.CancelFunc) {
-	ctx, cancel := context.WithTimeout(context.TODO(), 4*time.Second)
+func mongoConfig() (context.Context, context.CancelFunc) {
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	return ctx, cancel
 }
 
 func CloseMongoDB() {
-	for _, val := range fullDbMongoDB {
-		for _, v := range val {
-			err := v.Disconnect(context.TODO())
+	for _, v := range fullMongoDB {
+		err := v.Disconnect(context.TODO())
 
-			if err != nil {
-				// panic(err)
-			}
+		if err != nil {
+			// panic(err)
 		}
 	}
 

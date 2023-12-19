@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"go-schedule/libs/tool"
 )
 
 func HandleRun() {
 	pid := os.Getpid()
-	log.Info(fmt.Sprintf("The process id of the service is %v", pid))
+	tool.Stdout(fmt.Sprintf("The process id of the service is %v", pid))
 }
 
 func HandleCheck() func() {
 	return func() {
-		log.Info("Scheduled task is running...")
+		tool.Stdout("Scheduled task is running...")
 	}
 }

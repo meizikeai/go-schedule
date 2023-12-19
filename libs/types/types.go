@@ -53,3 +53,8 @@ type ConfEtcd struct {
 	Username string   `json:"username"`
 	Password string   `json:"password"`
 }
+
+type ConfMongoDB struct {
+	Master string `json:"master"`
+	Slave  string `json:"slave"`
+}

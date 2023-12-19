@@ -22,8 +22,8 @@ func init() {
 
 func main() {
 	tool.SignalHandler(func() {
-		tool.CloseMySQL()
-		tool.CloseRedis()
+		// tool.CloseMySQL()
+		// tool.CloseRedis()
 		// tool.CloseMongoDB()
 		// tool.CloseKafka()
 		// tool.CloseElasticSearch()

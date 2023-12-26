@@ -58,3 +58,19 @@ type ConfMongoDB struct {
 	Master string `json:"master"`
 	Slave  string `json:"slave"`
 }
+
+type ConMail struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type MailMessage struct {
+	From    string   `json:"from"`
+	Subject string   `json:"subject"`
+	Data    string   `json:"data"`
+	To      []string `json:"to"`
+	Cc      []string `json:"cc"`
+	File    []string `json:"file"`
+}

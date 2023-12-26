@@ -12,6 +12,7 @@ func init() {
 	// tool.HandleMySQLClient()
 	// tool.HandleRedisClient()
 	// tool.HandleMongodbClient()
+	// tool.HandleMailClient()
 
 	// tool.HandleElasticSearchClient()
 	// tool.HandleKafkaProducerClient()
@@ -27,6 +28,7 @@ func main() {
 		// tool.CloseMongoDB()
 		// tool.CloseKafka()
 		// tool.CloseElasticSearch()
+		// tool.CloseMail()
 
 		tool.Stdout("The Service is Shutdown")
 

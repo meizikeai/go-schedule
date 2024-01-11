@@ -28,10 +28,11 @@ type OutConfRedis struct {
 	Password           string `json:"password"`
 	DB                 int    `json:"db"`
 	MaxRetries         int    `json:"max_retries"`
+	PoolSize           int    `json:"pool_size"`
+	MinIdleConns       int    `json:"min_idle_conns"`
 	DialTimeout        int    `json:"dial_timeout"`
 	ReadTimeout        int    `json:"read_timeout"`
 	WriteTimeout       int    `json:"write_timeout"`
-	PoolSize           int    `json:"pool_size"`
 	IdleTimeout        int    `json:"idle_timeout"`
 	IdleCheckFrequency int    `json:"idle_check_frequency"`
 }

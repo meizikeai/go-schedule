@@ -5,10 +5,23 @@ import (
 	"os"
 )
 
-func getMode() string {
+var env = []string{
+	"release",
+	"test",
+}
+
+func GetMode() string {
+	pass := false
 	mode := os.Getenv("GO_MODE")
 
-	if mode == "" {
+	for _, v := range env {
+		if v == mode {
+			pass = true
+			break
+		}
+	}
+
+	if pass == false {
 		mode = "test"
 	}
 
@@ -16,7 +29,7 @@ func getMode() string {
 }
 
 func isProduction() bool {
-	mode := getMode()
+	mode := GetMode()
 	result := false
 
 	if mode == "release" {
@@ -27,7 +40,7 @@ func isProduction() bool {
 }
 
 func getKey(k string) string {
-	mode := getMode()
+	mode := GetMode()
 	result := fmt.Sprintf("%s-%s", k, mode)
 
 	return result

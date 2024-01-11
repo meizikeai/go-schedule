@@ -13,10 +13,11 @@ import (
 
 var connRedis = types.OutConfRedis{
 	MaxRetries:         3,
+	PoolSize:           20,
+	MinIdleConns:       10,
 	DialTimeout:        5,
 	ReadTimeout:        500,
 	WriteTimeout:       500,
-	PoolSize:           10,
 	IdleTimeout:        300,
 	IdleCheckFrequency: 60,
 }
@@ -32,14 +33,13 @@ func GetRedisClient(key string) *redis.Client {
 func HandleRedisClient() {
 	client := make(map[string][]*redis.Client)
 
+	// local := getRedisConfig()
 	local := config.GetRedisConfig()
 
 	for k, v := range local {
-		key := k + ".master"
-
 		for _, addr := range v.Master {
 			clients := handleRedisClient(addr, v.Password, v.Db)
-			client[key] = append(client[key], clients)
+			client[k] = append(client[k], clients)
 		}
 	}
 
@@ -55,10 +55,11 @@ func createRedisClient(config types.OutConfRedis) *redis.Client {
 		Password:           config.Password,
 		DB:                 config.DB,
 		MaxRetries:         config.MaxRetries,
+		PoolSize:           config.PoolSize,
+		MinIdleConns:       config.MinIdleConns,
 		DialTimeout:        time.Duration(config.DialTimeout) * time.Second,
 		ReadTimeout:        time.Duration(config.ReadTimeout) * time.Millisecond,
 		WriteTimeout:       time.Duration(config.WriteTimeout) * time.Millisecond,
-		PoolSize:           config.PoolSize * runtime.NumCPU(),
 		PoolTimeout:        time.Duration(config.ReadTimeout)*time.Millisecond + time.Second,
 		IdleTimeout:        time.Duration(config.IdleTimeout) * time.Second,
 		IdleCheckFrequency: time.Duration(config.IdleCheckFrequency) * time.Second,
@@ -79,7 +80,8 @@ func handleRedisClient(addr, password string, db int) *redis.Client {
 		Password:           password,
 		DB:                 db,
 		MaxRetries:         connRedis.MaxRetries,
-		PoolSize:           connRedis.PoolSize,
+		PoolSize:           connRedis.PoolSize * runtime.NumCPU(),
+		MinIdleConns:       connRedis.MinIdleConns * runtime.NumCPU(),
 		ReadTimeout:        connRedis.ReadTimeout,
 		WriteTimeout:       connRedis.WriteTimeout,
 		IdleTimeout:        connRedis.IdleTimeout,

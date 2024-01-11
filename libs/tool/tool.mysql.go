@@ -27,6 +27,7 @@ func GetMySQLClient(key string) *sql.DB {
 func HandleMySQLClient() {
 	client := make(map[string][]*sql.DB)
 
+	// local := getMySQLConfig()
 	local := config.GetMySQLConfig()
 
 	for k, v := range local {

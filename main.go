@@ -9,6 +9,7 @@ import (
 )
 
 func init() {
+	// tool.HandleZookeeperConfig()
 	// tool.HandleMySQLClient()
 	// tool.HandleRedisClient()
 	// tool.HandleMongodbClient()

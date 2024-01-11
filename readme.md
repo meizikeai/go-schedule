@@ -11,7 +11,7 @@ https://github.com/meizikeai/go-schedule.git
 #### 项目结构
 
 | 路径   | 描述          | 详情 |
-|--------|---------------|------|
+| ------ | ------------- | ---- |
 | config | config        | --   |
 | libs   | lib           | --   |
 | models | mysql / redis | --   |
@@ -22,7 +22,7 @@ https://github.com/meizikeai/go-schedule.git
 
   + 克隆项目 - `$ git clone https://github.com/meizikeai/go-schedule.git`
   + 安装依赖 - `$ cd go-schedule && go mod tidy`
-  + 启动项目 - `$ fresh / go run .`
+  + 启动项目 - `$ go run .`
 
 推荐[Visual Studio Code](https://code.visualstudio.com)编辑器，开发依赖[Tools](https://github.com/golang/vscode-go/blob/master/docs/tools.md)，请正确安装好后再开始。
 

@@ -2,8 +2,9 @@ package tool
 
 import (
 	"fmt"
-	"go-schedule/config"
 	"strings"
+
+	"go-schedule/config"
 
 	"github.com/IBM/sarama"
 )

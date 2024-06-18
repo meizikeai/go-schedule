@@ -17,8 +17,9 @@ var zookeeperService zookeeper
 
 var zookeeperMySQL map[string]types.ConfMySQL
 var zookeeperRedis map[string]types.ConfRedis
+var zookeeperApi map[string][]string
 
-func HandleZookeeperConfig() {
+func HandleZookeeperClient() {
 	zk := GetZookeeperService()
 	option := config.ZookeeperConfig
 
@@ -41,6 +42,15 @@ func HandleZookeeperConfig() {
 			}
 
 			zookeeperRedis = config
+		} else if key == "api" {
+			config := make(map[string][]string, 0)
+
+			for k, v := range val {
+				back := zk.GetZookeeperApiConfig(v)
+				config[k] = back
+			}
+
+			zookeeperApi = config
 		}
 	}
 
@@ -92,16 +102,36 @@ func (z *zookeeper) Children(path string) []string {
 	return res
 }
 
+func (z *zookeeper) filterData(path string) []string {
+	result := make([]string, 0)
+
+	data := z.Children(path)
+
+	for _, v := range data {
+		key := path + "/" + v
+
+		back := z.Get(key)
+
+		if back == "0" {
+			result = append(result, v)
+		}
+	}
+
+	return result
+}
+
 func (z *zookeeper) Close() {
 	z.Client.Close()
 }
 
+func (z *zookeeper) GetZookeeperApiConfig(path string) []string {
+	return z.filterData(path)
+}
+
 func (z *zookeeper) GetZookeeperRedisConfig(path string) types.ConfRedis {
-	redis := types.ConfRedis{}
-
-	back := z.Children(path)
-
-	redis.Master = back
+	redis := types.ConfRedis{
+		Master: z.filterData(path),
+	}
 
 	return redis
 }
@@ -122,9 +152,9 @@ func (z *zookeeper) GetZookeeperMySQLConfig(path string) types.ConfMySQL {
 
 		switch val {
 		case "master":
-			mysql.Master = z.Children(key)
+			mysql.Master = z.filterData(key)
 		case "slave":
-			mysql.Slave = z.Children(key)
+			mysql.Slave = z.filterData(key)
 		case "username":
 			mysql.Username = z.Get(key)
 		case "password":

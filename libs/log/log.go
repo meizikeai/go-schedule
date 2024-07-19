@@ -1,6 +1,7 @@
 package log
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -48,18 +49,23 @@ func getLogger(file string) *lumberjack.Logger {
 	return template
 }
 
-func createHook(traFile, outFile, errFile string) *Hook {
-	tralog := getLogger(traFile)
-	outlog := getLogger(outFile)
+func createHook(errFile, warFile, infFile, debFile, traFile string) *Hook {
 	errlog := getLogger(errFile)
+	warlog := getLogger(warFile)
+	inflog := getLogger(infFile)
+	deblog := getLogger(debFile)
+	tralog := getLogger(traFile)
 
 	hook := Hook{
-		defaultLogger: outlog,
+		defaultLogger: tralog,
 		minLevel:      logrus.TraceLevel,
 		formatter:     &logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"},
 		loggerByLevel: map[logrus.Level]*lumberjack.Logger{
-			logrus.TraceLevel: tralog,
 			logrus.ErrorLevel: errlog,
+			logrus.WarnLevel:  warlog,
+			logrus.InfoLevel:  inflog,
+			logrus.DebugLevel: deblog,
+			logrus.TraceLevel: tralog,
 		},
 	}
 
@@ -70,18 +76,23 @@ func HandleLogger(app string) {
 	pwd, _ := os.Getwd()
 	mode := os.Getenv("GO_ENV")
 
-	traFile := filepath.Join("/data/logs/", app, "/trace.log")
-	outFile := filepath.Join("/data/logs/", app, "/out.log")
 	errFile := filepath.Join("/data/logs/", app, "/error.log")
+	warFile := filepath.Join("/data/logs/", app, "/warn.log")
+	infFile := filepath.Join("/data/logs/", app, "/info.log")
+	debFile := filepath.Join("/data/logs/", app, "/debug.log")
+	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 
 	if mode == "debug" {
-		traFile = pwd + "/logs/trace.log"
-		outFile = pwd + "/logs/out.log"
-		errFile = pwd + "/logs/error.log"
+		errFile = filepath.Join(pwd, "../logs/error.log")
+		warFile = filepath.Join(pwd, "../logs/warn.log")
+		infFile = filepath.Join(pwd, "../logs/info.log")
+		debFile = filepath.Join(pwd, "../logs/debug.log")
+		traFile = filepath.Join(pwd, "../logs/trace.log")
 	}
 
-	hook := createHook(traFile, outFile, errFile)
+	hook := createHook(errFile, warFile, infFile, debFile, traFile)
 
+	logrus.SetOutput(io.Discard)
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.AddHook(hook)
 }

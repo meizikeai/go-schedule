@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 )
 
 func SignalHandler(callback func()) {
@@ -39,8 +38,8 @@ func SignalHandler(callback func()) {
 	}()
 }
 
-func Stdout(format string, v ...interface{}) {
-	log := fmt.Sprintf("%s %s %s \n", time.Now().Format("2006-01-02 15:04:05"), "[go-schedule]", format)
+func Stdout(format string, v ...any) {
+	log := fmt.Sprintf("%s %s %s \n", GetTime(), "[go-schedule]", format)
 
 	if _, err := fmt.Fprintf(os.Stdout, log, v...); err != nil {
 		panic(err)

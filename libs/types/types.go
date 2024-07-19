@@ -1,6 +1,6 @@
 package types
 
-type MapStringInterface map[string]interface{}
+type MapStringInterface map[string]any
 type MapStringString map[string]string
 
 type ConfMySQL struct {

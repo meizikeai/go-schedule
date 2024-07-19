@@ -41,7 +41,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 	}
 
 	pool := &http.Client{
-		Timeout: 200 * time.Millisecond,
+		Timeout: 4000 * time.Millisecond,
 	}
 
 	res, err := pool.Do(req)
@@ -64,7 +64,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 	return result, err
 }
 
-func POST(reqUrl string, body interface{}, params, headers map[string]string) ([]byte, error) {
+func POST(reqUrl string, body any, params, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)
@@ -93,7 +93,7 @@ func POST(reqUrl string, body interface{}, params, headers map[string]string) ([
 	}
 
 	pool := &http.Client{
-		Timeout: 200 * time.Millisecond,
+		Timeout: 4000 * time.Millisecond,
 	}
 
 	res, err := pool.Do(req)

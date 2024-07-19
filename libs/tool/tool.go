@@ -23,7 +23,7 @@ func Contain(arr []string, element string) bool {
 	return false
 }
 
-func MarshalJson(date interface{}) []byte {
+func MarshalJson(date any) []byte {
 	res, err := json.Marshal(date)
 
 	if err != nil {
@@ -33,8 +33,8 @@ func MarshalJson(date interface{}) []byte {
 	return res
 }
 
-func UnmarshalJson(date string) map[string]interface{} {
-	var res map[string]interface{}
+func UnmarshalJson(date string) map[string]any {
+	var res map[string]any
 
 	_ = json.Unmarshal([]byte(date), &res)
 
@@ -196,7 +196,7 @@ func RemoveDuplicateElement(strs []string) []string {
 	return result
 }
 
-func IsSlice(v interface{}) bool {
+func IsSlice(v any) bool {
 	kind := reflect.ValueOf(v).Kind()
 
 	if kind == reflect.Slice || kind == reflect.Array {

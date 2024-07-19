@@ -1,14 +1,14 @@
 # go-schedule
 
-### 项目构架
+## 项目构架
 
 基于[cron](https://github.com/robfig/cron/v3)构建，支持[mysql](https://github.com/go-sql-driver/mysql)、[redis](https://github.com/go-redis/redis)查询，依赖[golang](https://golang.google.cn/dl)环境。
 
-#### 项目地址
+## 项目地址
 
 https://github.com/meizikeai/go-schedule.git
 
-#### 项目结构
+## 项目结构
 
 | 路径   | 描述          | 详情 |
 | ------ | ------------- | ---- |
@@ -18,7 +18,7 @@ https://github.com/meizikeai/go-schedule.git
 | task   | schedule      | --   |
 | go.mod | go modules    | --   |
 
-#### 开发环境
+## 开发环境
 
   + 克隆项目 - `$ git clone https://github.com/meizikeai/go-schedule.git`
   + 安装依赖 - `$ cd go-schedule && go mod tidy`
@@ -26,7 +26,7 @@ https://github.com/meizikeai/go-schedule.git
 
 推荐[Visual Studio Code](https://code.visualstudio.com)编辑器，开发依赖[Tools](https://github.com/golang/vscode-go/blob/master/docs/tools.md)，请正确安装好后再开始。
 
-#### 项目变量
+## 项目变量
 
 在测试、线上环境需要设置 `GO_MODE` 的值来区分相应环境。
 
@@ -36,11 +36,11 @@ https://github.com/meizikeai/go-schedule.git
 
 为确保正确写日志，本地开发添加 `export GO_ENV=debug` 环境变量。
 
-#### 自动部署
+## 自动部署
 
 如果使用 GitLab 作仓库，可以使用 https://github.com/meizikeai/gitlab-golang-shell.git 跑CI/CD，项目默认有 .gitlab-ci.yml 文件，请君参考！
 
-#### 帮助文档
+## 帮助文档
 
  `通过以下命令行执行`
 
@@ -90,7 +90,7 @@ $ supervisorctl update
 $ supervisorctl status
 ```
 
-#### 学习资料
+## 学习资料
 
 **Go 语言设计与实现**
 

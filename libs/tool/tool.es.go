@@ -13,14 +13,14 @@ import (
 
 var fullElasticSearch map[string][]*elasticsearch.Client
 
-func GetElasticSearchClient(key string) *elasticsearch.Client {
+func (t *Tools) GetElasticSearchClient(key string) *elasticsearch.Client {
 	result := fullElasticSearch[key]
-	count := GetRandmod(len(result))
+	count := t.GetRandmod(len(result))
 
 	return result[count]
 }
 
-func HandleElasticSearchClient() {
+func (t *Tools) HandleElasticSearchClient() {
 	client := make(map[string][]*elasticsearch.Client)
 
 	local := config.GetElasticSearchConfig()
@@ -34,7 +34,7 @@ func HandleElasticSearchClient() {
 
 	fullElasticSearch = client
 
-	Stdout("ElasticSearch is Connected")
+	t.Stdout("ElasticSearch is Connected")
 }
 
 func createElasticSearchClient(address []string, username, password string) *elasticsearch.Client {
@@ -67,7 +67,7 @@ func createElasticSearchClient(address []string, username, password string) *ela
 	return client
 }
 
-func CloseElasticSearch() {
+func (t *Tools) CloseElasticSearch() {
 	// for _, val := range fullElasticSearch {
 	// 	for _, v := range val {
 	// 		// Can't find a way to close it
@@ -75,5 +75,5 @@ func CloseElasticSearch() {
 	// 	}
 	// }
 
-	Stdout("ElasticSearch is Close")
+	t.Stdout("ElasticSearch is Close")
 }

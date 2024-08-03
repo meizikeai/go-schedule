@@ -17,14 +17,14 @@ var connMySQL = types.ConnMySQLMax{
 }
 var fullDbMySQL map[string][]*sql.DB
 
-func GetMySQLClient(key string) *sql.DB {
+func (t *Tools) GetMySQLClient(key string) *sql.DB {
 	result := fullDbMySQL[key]
-	count := GetRandmod(len(result))
+	count := t.GetRandmod(len(result))
 
 	return result[count]
 }
 
-func HandleMySQLClient() {
+func (t *Tools) HandleMySQLClient() {
 	client := make(map[string][]*sql.DB)
 
 	// local := getMySQLConfig()
@@ -47,7 +47,7 @@ func HandleMySQLClient() {
 
 	fullDbMySQL = client
 
-	Stdout("MySQL is Connected")
+	t.Stdout("MySQL is Connected")
 }
 
 // Timeout, read timeout, write timeout defaults to 1s
@@ -106,12 +106,12 @@ func createDSN(addr, user, passwd, dbname string) string {
 	return config.FormatDSN()
 }
 
-func CloseMySQL() {
+func (t *Tools) CloseMySQL() {
 	for _, val := range fullDbMySQL {
 		for _, v := range val {
 			v.Close()
 		}
 	}
 
-	Stdout("MySQL is Close")
+	t.Stdout("MySQL is Close")
 }

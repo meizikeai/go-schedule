@@ -9,11 +9,11 @@ import (
 
 var oneMail map[string]gomail.SendCloser
 
-func GetMailClient(key string) gomail.SendCloser {
+func (t *Tools) GetMailClient(key string) gomail.SendCloser {
 	return oneMail[key]
 }
 
-func HandleMailClient() {
+func (t *Tools) HandleMailClient() {
 	clients := make(map[string]gomail.SendCloser)
 
 	local := config.GetMailConfig()
@@ -33,10 +33,10 @@ func HandleMailClient() {
 
 	oneMail = clients
 
-	Stdout("Mail Dialer is Connected")
+	t.Stdout("Mail Dialer is Connected")
 }
 
-func CloseMail() {
+func (t *Tools) CloseMail() {
 	var err error
 
 	for _, v := range oneMail {
@@ -48,11 +48,11 @@ func CloseMail() {
 	}
 
 	if err != nil {
-		Stdout("Mail Dialer is Close")
+		t.Stdout("Mail Dialer is Close")
 	}
 }
 
-func CreateMailMessage(e *types.MailMessage) *gomail.Message {
+func (t *Tools) CreateMailMessage(e *types.MailMessage) *gomail.Message {
 	m := gomail.NewMessage()
 
 	if len(e.Cc) > 0 {

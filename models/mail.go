@@ -3,11 +3,10 @@ package models
 import (
 	"fmt"
 
-	"go-schedule/libs/tool"
 	"go-schedule/libs/types"
 )
 
-var test = &types.MailMessage{
+var test = types.MailMessage{
 	From:    "from@163.com",
 	To:      []string{"to@163.com"},
 	Subject: "Welcome!",
@@ -15,8 +14,8 @@ var test = &types.MailMessage{
 }
 
 func SendTestMail() {
-	m := tool.GetMailClient("mail")
-	message := tool.CreateMailMessage(test)
+	m := tools.GetMailClient("mail")
+	message := tools.CreateMailMessage(&test)
 
 	err := m.Send(test.From, test.To, message)
 

@@ -12,7 +12,7 @@ import (
 
 var fullMongoDB map[string]*mongo.Client
 
-func GetMongoCollection(key, database, table string) *mongo.Collection {
+func (t *Tools) GetMongoCollection(key, database, table string) *mongo.Collection {
 	client := fullMongoDB[key]
 
 	db := client.Database(database)
@@ -21,7 +21,7 @@ func GetMongoCollection(key, database, table string) *mongo.Collection {
 	return collection
 }
 
-func HandleMongoDBClient() {
+func (t *Tools) HandleMongoDBClient() {
 	clients := make(map[string]*mongo.Client)
 
 	local := config.GetMongodbConfig()
@@ -39,7 +39,7 @@ func HandleMongoDBClient() {
 
 	fullMongoDB = clients
 
-	Stdout("MongoDB is Connected")
+	t.Stdout("MongoDB is Connected")
 }
 
 func createMongoDBClient(uri string) *mongo.Client {
@@ -71,7 +71,7 @@ func mongoConfig() (context.Context, context.CancelFunc) {
 	return ctx, cancel
 }
 
-func CloseMongoDB() {
+func (t *Tools) CloseMongoDB() {
 	for _, v := range fullMongoDB {
 		err := v.Disconnect(context.TODO())
 
@@ -80,5 +80,5 @@ func CloseMongoDB() {
 		}
 	}
 
-	Stdout("MongoDB is Close")
+	t.Stdout("MongoDB is Close")
 }

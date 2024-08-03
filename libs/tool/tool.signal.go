@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-func SignalHandler(callback func()) {
+func (t *Tools) SignalHandler(callback func()) {
 	usrDefChan := make(chan os.Signal, 1)
 	sysSignalChan := make(chan os.Signal, 1)
 
@@ -16,7 +16,7 @@ func SignalHandler(callback func()) {
 	go func() {
 		for {
 			sig := <-usrDefChan
-			Stdout("User signal recv: %v", sig)
+			t.Stdout("User signal recv: %v", sig)
 			switch sig {
 			case syscall.SIGUSR1:
 			case syscall.SIGUSR2:
@@ -32,14 +32,14 @@ func SignalHandler(callback func()) {
 
 	go func() {
 		sig := <-sysSignalChan
-		Stdout("System signal recv: %v", sig)
+		t.Stdout("System signal recv: %v", sig)
 		callback()
 		os.Exit(0)
 	}()
 }
 
-func Stdout(format string, v ...any) {
-	log := fmt.Sprintf("%s %s %s \n", GetTime(), "[go-schedule]", format)
+func (t *Tools) Stdout(format string, v ...any) {
+	log := fmt.Sprintf("%s %s %s \n", t.GetTime(), "[go-schedule]", format)
 
 	if _, err := fmt.Fprintf(os.Stdout, log, v...); err != nil {
 		panic(err)

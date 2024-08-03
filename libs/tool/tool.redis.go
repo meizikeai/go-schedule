@@ -23,14 +23,14 @@ var connRedis = types.OutConfRedis{
 }
 var fullDbRedis map[string][]*redis.Client
 
-func GetRedisClient(key string) *redis.Client {
+func (t *Tools) GetRedisClient(key string) *redis.Client {
 	result := fullDbRedis[key]
-	count := GetRandmod(len(result))
+	count := t.GetRandmod(len(result))
 
 	return result[count]
 }
 
-func HandleRedisClient() {
+func (t *Tools) HandleRedisClient() {
 	client := make(map[string][]*redis.Client)
 
 	// local := getRedisConfig()
@@ -45,7 +45,7 @@ func HandleRedisClient() {
 
 	fullDbRedis = client
 
-	Stdout("Redis is Connected")
+	t.Stdout("Redis is Connected")
 }
 
 func createRedisClient(config types.OutConfRedis) *redis.Client {
@@ -93,12 +93,12 @@ func handleRedisClient(addr, password string, db int) *redis.Client {
 	return client
 }
 
-func CloseRedis() {
+func (t *Tools) CloseRedis() {
 	for _, val := range fullDbRedis {
 		for _, v := range val {
 			v.Close()
 		}
 	}
 
-	Stdout("Redis is Close")
+	t.Stdout("Redis is Close")
 }

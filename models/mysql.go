@@ -6,6 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var tools = tool.NewTools()
+
 // test structure
 // CREATE TABLE `test_user_info` (
 //   `id` int NOT NULL AUTO_INCREMENT,
@@ -36,7 +38,7 @@ type Person struct {
 }
 
 func AddPerson(v []string) (id int64, err error) {
-	pool := tool.GetMySQLClient("default.master")
+	pool := tools.GetMySQLClient("default.master")
 	res, err := pool.Exec(`
 		INSERT INTO test_user_info(id, email, name, national, gender, idcard, phone, address, postcode)
 		VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -54,7 +56,7 @@ func AddPerson(v []string) (id int64, err error) {
 func GetPerson(email string) (result Person, err error) {
 	var person Person
 
-	pool := tool.GetMySQLClient("default.master")
+	pool := tools.GetMySQLClient("default.master")
 	res := pool.QueryRow("SELECT id, email, name, national, gender, idcard, phone, address, postcode, datetime FROM test_user_info WHERE email=?", email)
 
 	err = res.Scan(
@@ -80,7 +82,7 @@ func GetPerson(email string) (result Person, err error) {
 }
 
 func GetPersons() (result []Person, err error) {
-	pool := tool.GetMySQLClient("default.master")
+	pool := tools.GetMySQLClient("default.master")
 	res, err := pool.Query("SELECT id, email, name, national, gender, idcard, phone, address, postcode, datetime FROM test_user_info")
 
 	if err != nil {
@@ -114,7 +116,7 @@ func GetPersons() (result []Person, err error) {
 }
 
 func UpdatePerson(name, phone, email string) (ra int64, err error) {
-	pool := tool.GetMySQLClient("default.master")
+	pool := tools.GetMySQLClient("default.master")
 	row, err := pool.Prepare("UPDATE test_user_info SET name=?, phone=? WHERE id=?")
 
 	defer row.Close()

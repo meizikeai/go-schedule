@@ -19,8 +19,8 @@ var zookeeperMySQL map[string]types.ConfMySQL
 var zookeeperRedis map[string]types.ConfRedis
 var zookeeperApi map[string][]string
 
-func HandleZookeeperClient() {
-	zk := GetZookeeperService()
+func (t *Tools) HandleZookeeperClient() {
+	zk := getZookeeperService()
 	option := config.ZookeeperConfig
 
 	for key, val := range option {
@@ -75,7 +75,7 @@ func newZookeeper(servers []string) *zk.Conn {
 	return client
 }
 
-func GetZookeeperService() *zookeeper {
+func getZookeeperService() *zookeeper {
 	config := config.GetZookeeperConfig()
 	zookeeperService.Client = newZookeeper(config)
 

@@ -8,30 +8,32 @@ import (
 	"go-schedule/task"
 )
 
-func init() {
-	// tool.HandleZookeeperClient()
-	// tool.HandleMySQLClient()
-	// tool.HandleRedisClient()
-	// tool.HandleMongodbClient()
-	// tool.HandleMailClient()
+var tools = tool.NewTools()
 
-	// tool.HandleElasticSearchClient()
-	// tool.HandleKafkaProducerClient()
-	// tool.HandleKafkaConsumerClient()
+func init() {
+	// tools.HandleZookeeperClient()
+	// tools.HandleMySQLClient()
+	// tools.HandleRedisClient()
+	// tools.HandleMongodbClient()
+	// tools.HandleMailClient()
+
+	// tools.HandleElasticSearchClient()
+	// tools.HandleKafkaProducerClient()
+	// tools.HandleKafkaConsumerClient()
 
 	log.HandleLogger("go-schedule")
 }
 
 func main() {
-	tool.SignalHandler(func() {
-		// tool.CloseMySQL()
-		// tool.CloseRedis()
-		// tool.CloseMongoDB()
-		// tool.CloseKafka()
-		// tool.CloseElasticSearch()
-		// tool.CloseMail()
+	tools.SignalHandler(func() {
+		// tools.CloseMySQL()
+		// tools.CloseRedis()
+		// tools.CloseMongoDB()
+		// tools.CloseKafka()
+		// tools.CloseElasticSearch()
+		// tools.CloseMail()
 
-		tool.Stdout("The Service is Shutdown")
+		tools.Stdout("The Service is Shutdown")
 
 		os.Exit(0)
 	})
@@ -40,7 +42,7 @@ func main() {
 	task.HandleRun()
 
 	// checking
-	check := tool.HandleCron("0 10 */1 * *", task.HandleCheck())
+	check := tools.HandleCron("0 10 */1 * *", task.HandleCheck())
 	defer check.Stop()
 
 	// kafka producer

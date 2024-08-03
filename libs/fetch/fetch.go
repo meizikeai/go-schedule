@@ -61,7 +61,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 
 	defer res.Body.Close()
 
-	return result, err
+	return result, nil
 }
 
 func POST(reqUrl string, body any, params, headers map[string]string) ([]byte, error) {
@@ -113,5 +113,5 @@ func POST(reqUrl string, body any, params, headers map[string]string) ([]byte, e
 
 	defer res.Body.Close()
 
-	return result, err
+	return result, nil
 }

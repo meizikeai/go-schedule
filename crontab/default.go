@@ -1,4 +1,4 @@
-package task
+package crontab
 
 import (
 	"fmt"
@@ -8,15 +8,21 @@ import (
 	"go-schedule/libs/tool"
 )
 
+type Tasks struct{}
+
+func NewTasks() *Tasks {
+	return &Tasks{}
+}
+
 var tools = tool.NewTools()
 
-func HandleRun() {
+func (t *Tasks) HandleRun() {
 	pid := os.Getpid()
 	tools.Stdout("The current environment is " + config.GetMode())
 	tools.Stdout(fmt.Sprintf("The process id of the service is %v", pid))
 }
 
-func HandleCheck() func() {
+func (t *Tasks) HandleCheck() func() {
 	return func() {
 		tools.Stdout("Scheduled task is running...")
 	}

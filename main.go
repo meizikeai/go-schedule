@@ -3,12 +3,16 @@ package main
 import (
 	"os"
 
+	"go-schedule/crontab"
 	"go-schedule/libs/log"
 	"go-schedule/libs/tool"
-	"go-schedule/task"
 )
 
 var tools = tool.NewTools()
+var tasks = crontab.NewTasks()
+
+// var kafkaProducer = tool.NewKafkaProducer()
+// var kafkaConsumer = tool.NewKafkaConsumer()
 
 func init() {
 	// tools.HandleZookeeperClient()
@@ -39,17 +43,17 @@ func main() {
 	})
 
 	// running
-	task.HandleRun()
+	tasks.HandleRun()
 
 	// checking
-	check := tools.HandleCron("0 10 */1 * *", task.HandleCheck())
+	check := tools.HandleCron("0 10 */1 * *", tasks.HandleCheck())
 	defer check.Stop()
 
 	// kafka producer
-	// tool.SendKafkaProducerMessage("broker", "topic", "sync", "test")
+	// kafkaProducer.SendKafkaProducerMessage("broker", "topic", "sync", "test")
 
 	// kafka consumer
-	// tool.HandlerKafkaConsumerMessage("broker", "topic")
+	// kafkaConsumer.HandlerKafkaConsumerMessage("broker", "topic")
 
 	select {}
 }

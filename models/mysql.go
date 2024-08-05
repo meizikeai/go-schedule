@@ -6,6 +6,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type ModelsMySQL struct{}
+
+func NewModelsMySQL() *ModelsMySQL {
+	return &ModelsMySQL{}
+}
+
 var tools = tool.NewTools()
 
 // test structure
@@ -37,7 +43,7 @@ type Person struct {
 	Datetime string `json:"datetime" form:"datetime"`
 }
 
-func AddPerson(v []string) (id int64, err error) {
+func (m *ModelsMySQL) AddPerson(v []string) (id int64, err error) {
 	pool := tools.GetMySQLClient("default.master")
 	res, err := pool.Exec(`
 		INSERT INTO test_user_info(id, email, name, national, gender, idcard, phone, address, postcode)
@@ -53,7 +59,7 @@ func AddPerson(v []string) (id int64, err error) {
 	return id, err
 }
 
-func GetPerson(email string) (result Person, err error) {
+func (m *ModelsMySQL) GetPerson(email string) (result Person, err error) {
 	var person Person
 
 	pool := tools.GetMySQLClient("default.master")
@@ -81,7 +87,7 @@ func GetPerson(email string) (result Person, err error) {
 	return result, err
 }
 
-func GetPersons() (result []Person, err error) {
+func (m *ModelsMySQL) GetPersons() (result []Person, err error) {
 	pool := tools.GetMySQLClient("default.master")
 	res, err := pool.Query("SELECT id, email, name, national, gender, idcard, phone, address, postcode, datetime FROM test_user_info")
 
@@ -115,7 +121,7 @@ func GetPersons() (result []Person, err error) {
 	return result, err
 }
 
-func UpdatePerson(name, phone, email string) (ra int64, err error) {
+func (m *ModelsMySQL) UpdatePerson(name, phone, email string) (ra int64, err error) {
 	pool := tools.GetMySQLClient("default.master")
 	row, err := pool.Prepare("UPDATE test_user_info SET name=?, phone=? WHERE id=?")
 

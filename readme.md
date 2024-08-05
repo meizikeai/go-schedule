@@ -10,13 +10,13 @@ https://github.com/meizikeai/go-schedule.git
 
 ## 项目结构
 
-| 路径   | 描述          | 详情 |
-| ------ | ------------- | ---- |
-| config | config        | --   |
-| libs   | lib           | --   |
-| models | mysql / redis | --   |
-| task   | schedule      | --   |
-| go.mod | go modules    | --   |
+| 路径    | 描述          | 详情 |
+| ------- | ------------- | ---- |
+| config  | config        | --   |
+| crontab | crontab       | --   |
+| libs    | lib           | --   |
+| models  | mysql / redis | --   |
+| go.mod  | go modules    | --   |
 
 ## 开发环境
 

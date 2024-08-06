@@ -9,7 +9,13 @@ import (
 	"time"
 )
 
-func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
+type Fetch struct{}
+
+func NewFetch() *Fetch {
+	return &Fetch{}
+}
+
+func (f *Fetch) GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	params := url.Values{}
@@ -64,7 +70,7 @@ func GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
 	return result, nil
 }
 
-func POST(reqUrl string, body any, params, headers map[string]string) ([]byte, error) {
+func (f *Fetch) POST(reqUrl string, body any, params, headers map[string]string) ([]byte, error) {
 	result := []byte{}
 
 	data, _ := json.Marshal(body)

@@ -10,6 +10,7 @@ import (
 
 var tools = tool.NewTools()
 var tasks = crontab.NewTasks()
+var daily = log.NewCreateLog()
 
 // var kafkaProducer = tool.NewKafkaProducer()
 // var kafkaConsumer = tool.NewKafkaConsumer()
@@ -25,7 +26,7 @@ func init() {
 	// tools.HandleKafkaProducerClient()
 	// tools.HandleKafkaConsumerClient()
 
-	log.HandleLogger("go-schedule")
+	daily.HandleLogger("go-schedule")
 }
 
 func main() {

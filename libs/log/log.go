@@ -1,6 +1,7 @@
 package log
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -36,7 +37,13 @@ func (hook *Hook) Levels() []logrus.Level {
 	return logrus.AllLevels[:hook.minLevel+1]
 }
 
-func getLogger(file string) *lumberjack.Logger {
+type CreateLog struct{}
+
+func NewCreateLog() *CreateLog {
+	return &CreateLog{}
+}
+
+func (c *CreateLog) getLogger(file string) *lumberjack.Logger {
 	template := &lumberjack.Logger{
 		Filename:   file,
 		MaxSize:    100,   // Maximum log file split size, default 100 MB
@@ -49,12 +56,12 @@ func getLogger(file string) *lumberjack.Logger {
 	return template
 }
 
-func createHook(errFile, warFile, infFile, debFile, traFile string) *Hook {
-	errlog := getLogger(errFile)
-	warlog := getLogger(warFile)
-	inflog := getLogger(infFile)
-	deblog := getLogger(debFile)
-	tralog := getLogger(traFile)
+func (c *CreateLog) createHook(errFile, warFile, infFile, debFile, traFile string) *Hook {
+	errlog := c.getLogger(errFile)
+	warlog := c.getLogger(warFile)
+	inflog := c.getLogger(infFile)
+	deblog := c.getLogger(debFile)
+	tralog := c.getLogger(traFile)
 
 	hook := Hook{
 		defaultLogger: tralog,
@@ -72,7 +79,7 @@ func createHook(errFile, warFile, infFile, debFile, traFile string) *Hook {
 	return &hook
 }
 
-func HandleLogger(app string) {
+func (c *CreateLog) HandleLogger(app string) {
 	pwd, _ := os.Getwd()
 	mode := os.Getenv("GO_ENV")
 
@@ -90,9 +97,45 @@ func HandleLogger(app string) {
 		traFile = filepath.Join(pwd, "../logs/trace.log")
 	}
 
-	hook := createHook(errFile, warFile, infFile, debFile, traFile)
+	hook := c.createHook(errFile, warFile, infFile, debFile, traFile)
 
 	logrus.SetOutput(io.Discard)
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.AddHook(hook)
+}
+
+type logger struct{}
+
+func NewLogger() *logger {
+	return &logger{}
+}
+
+func (l *logger) HandleErrorLogging(data any) {
+	logrus.Error(l.marshalJson(data))
+}
+
+func (l *logger) HandleWarnLogging(data any) {
+	logrus.Warn(l.marshalJson(data))
+}
+
+func (l *logger) HandleInfoLogging(data any) {
+	logrus.Info(l.marshalJson(data))
+}
+
+func (l *logger) HandleDebugLogging(data any) {
+	logrus.Debug(l.marshalJson(data))
+}
+
+func (l *logger) HandleTraceLogging(data any) {
+	logrus.Trace(l.marshalJson(data))
+}
+
+func (l *logger) marshalJson(date any) string {
+	res, err := json.Marshal(date)
+
+	if err != nil {
+		return ""
+	}
+
+	return string(res)
 }

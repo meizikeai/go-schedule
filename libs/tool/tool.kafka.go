@@ -9,9 +9,6 @@ import (
 	"github.com/IBM/sarama"
 )
 
-var fullProducerKafka map[string]sarama.AsyncProducer
-var fullConsumerKafka map[string]sarama.Consumer
-
 // producer
 type KafkaProducer struct{}
 
@@ -19,13 +16,15 @@ func NewKafkaProducer() *KafkaProducer {
 	return &KafkaProducer{}
 }
 
+var fullProducerKafka map[string]sarama.AsyncProducer
+
 func (t *Tools) HandleKafkaProducerClient() {
 	config := config.GetKafkaConfig()
 	result := make(map[string]sarama.AsyncProducer, len(config))
 
 	for k, v := range config {
 		addr := strings.Split(v, ",")
-		result[k] = createKafkaProducerClient(addr)
+		result[k] = t.createKafkaProducerClient(addr)
 	}
 
 	fullProducerKafka = result
@@ -33,7 +32,7 @@ func (t *Tools) HandleKafkaProducerClient() {
 	t.Stdout("Kafka is Connected")
 }
 
-func createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {
+func (t *Tools) createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {
 	config := sarama.NewConfig()
 	config.Producer.Return.Errors = false
 	config.Producer.Return.Successes = false
@@ -72,19 +71,21 @@ func NewKafkaConsumer() *KafkaConsumer {
 	return &KafkaConsumer{}
 }
 
+var fullConsumerKafka map[string]sarama.Consumer
+
 func (t *Tools) HandleKafkaConsumerClient() {
 	config := config.GetKafkaConfig()
 	result := make(map[string]sarama.Consumer, len(config))
 
 	for k, v := range config {
 		addr := strings.Split(v, ",")
-		result[k] = createKafkaConsumerClient(addr)
+		result[k] = t.createKafkaConsumerClient(addr)
 	}
 
 	fullConsumerKafka = result
 }
 
-func createKafkaConsumerClient(kfkConf []string) sarama.Consumer {
+func (t *Tools) createKafkaConsumerClient(kfkConf []string) sarama.Consumer {
 	consumer, err := sarama.NewConsumer(kfkConf, nil)
 
 	if err != nil {

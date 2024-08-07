@@ -8,12 +8,22 @@ import (
 	"go-schedule/libs/tool"
 )
 
-var tools = tool.NewTools()
-var tasks = crontab.NewTasks()
-var daily = log.NewCreateLog()
-
-// var kafkaProducer = tool.NewKafkaProducer()
-// var kafkaConsumer = tool.NewKafkaConsumer()
+var (
+	// rules = tool.NewRegexp()
+	// share = tool.NewShare()
+	tasks = crontab.NewTasks()
+	tools = tool.NewTools()
+	// units = tool.NewUnits()
+	// chaos  = secret.NewSecret()
+	daily = log.NewCreateLog()
+	// fetch  = models.NewModelsFetch()
+	// jwt    = token.NewJsonWebToken()
+	// lion   = fetch.NewFetch()
+	// logger = log.NewLogger()
+	// logic  = controllers.NewLogic()
+	// kafkaProducer = tool.NewKafkaProducer()
+	// kafkaConsumer = tool.NewKafkaConsumer()
+)
 
 func init() {
 	// tools.HandleZookeeperClient()

@@ -30,10 +30,10 @@ func (t *Tools) HandleMongoDBClient() {
 		m := k + ".master"
 		s := k + ".slave"
 
-		master := createMongoDBClient(v.Master)
+		master := t.createMongoDBClient(v.Master)
 		clients[m] = master
 
-		slave := createMongoDBClient(v.Slave)
+		slave := t.createMongoDBClient(v.Slave)
 		clients[s] = slave
 	}
 
@@ -42,8 +42,8 @@ func (t *Tools) HandleMongoDBClient() {
 	t.Stdout("MongoDB is Connected")
 }
 
-func createMongoDBClient(uri string) *mongo.Client {
-	ctx, cancel := mongoConfig()
+func (t *Tools) createMongoDBClient(uri string) *mongo.Client {
+	ctx, cancel := t.mongoConfig()
 	defer cancel()
 
 	config := options.Client().ApplyURI(uri)
@@ -66,7 +66,7 @@ func createMongoDBClient(uri string) *mongo.Client {
 	return client
 }
 
-func mongoConfig() (context.Context, context.CancelFunc) {
+func (t *Tools) mongoConfig() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	return ctx, cancel
 }

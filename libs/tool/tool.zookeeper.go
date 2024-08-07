@@ -13,14 +13,15 @@ type zookeeper struct {
 	Client *zk.Conn
 }
 
-var zookeeperService zookeeper
-
-var zookeeperMySQL map[string]types.ConfMySQL
-var zookeeperRedis map[string]types.ConfRedis
-var zookeeperApi map[string][]string
+var (
+	zookeeperService zookeeper
+	zookeeperMySQL   map[string]types.ConfMySQL
+	zookeeperRedis   map[string]types.ConfRedis
+	zookeeperApi     map[string][]string
+)
 
 func (t *Tools) HandleZookeeperClient() {
-	zk := getZookeeperService()
+	zk := t.getZookeeperService()
 	option := config.ZookeeperConfig
 
 	for key, val := range option {
@@ -57,15 +58,15 @@ func (t *Tools) HandleZookeeperClient() {
 	defer zk.Close()
 }
 
-func getMySQLConfig() map[string]types.ConfMySQL {
+func (t *Tools) getMySQLConfig() map[string]types.ConfMySQL {
 	return zookeeperMySQL
 }
 
-func getRedisConfig() map[string]types.ConfRedis {
+func (t *Tools) getRedisConfig() map[string]types.ConfRedis {
 	return zookeeperRedis
 }
 
-func newZookeeper(servers []string) *zk.Conn {
+func (t *Tools) newZookeeper(servers []string) *zk.Conn {
 	client, _, err := zk.Connect(servers, 4*time.Second)
 
 	if err != nil {
@@ -75,9 +76,9 @@ func newZookeeper(servers []string) *zk.Conn {
 	return client
 }
 
-func getZookeeperService() *zookeeper {
+func (t *Tools) getZookeeperService() *zookeeper {
 	config := config.GetZookeeperConfig()
-	zookeeperService.Client = newZookeeper(config)
+	zookeeperService.Client = t.newZookeeper(config)
 
 	return &zookeeperService
 }

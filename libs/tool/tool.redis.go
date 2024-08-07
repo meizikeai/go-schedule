@@ -11,17 +11,19 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-var connRedis = types.OutConfRedis{
-	MaxRetries:         3,
-	PoolSize:           20,
-	MinIdleConns:       10,
-	DialTimeout:        5,
-	ReadTimeout:        500,
-	WriteTimeout:       500,
-	IdleTimeout:        300,
-	IdleCheckFrequency: 60,
-}
-var fullDbRedis map[string][]*redis.Client
+var (
+	connRedis = types.OutConfRedis{
+		MaxRetries:         3,
+		PoolSize:           20,
+		MinIdleConns:       10,
+		DialTimeout:        5,
+		ReadTimeout:        500,
+		WriteTimeout:       500,
+		IdleTimeout:        300,
+		IdleCheckFrequency: 60,
+	}
+	fullDbRedis map[string][]*redis.Client
+)
 
 func (t *Tools) GetRedisClient(key string) *redis.Client {
 	result := fullDbRedis[key]
@@ -38,7 +40,7 @@ func (t *Tools) HandleRedisClient() {
 
 	for k, v := range local {
 		for _, addr := range v.Master {
-			clients := handleRedisClient(addr, v.Password, v.Db)
+			clients := t.handleRedisClient(addr, v.Password, v.Db)
 			client[k] = append(client[k], clients)
 		}
 	}
@@ -48,7 +50,7 @@ func (t *Tools) HandleRedisClient() {
 	t.Stdout("Redis is Connected")
 }
 
-func createRedisClient(config types.OutConfRedis) *redis.Client {
+func (t *Tools) createRedisClient(config types.OutConfRedis) *redis.Client {
 	db := redis.NewClient(&redis.Options{
 		Addr:               config.Addr,
 		Username:           config.Username,
@@ -74,7 +76,7 @@ func createRedisClient(config types.OutConfRedis) *redis.Client {
 	return db
 }
 
-func handleRedisClient(addr, password string, db int) *redis.Client {
+func (t *Tools) handleRedisClient(addr, password string, db int) *redis.Client {
 	option := types.OutConfRedis{
 		Addr:               addr,
 		Password:           password,
@@ -88,7 +90,7 @@ func handleRedisClient(addr, password string, db int) *redis.Client {
 		IdleCheckFrequency: connRedis.IdleCheckFrequency,
 	}
 
-	client := createRedisClient(option)
+	client := t.createRedisClient(option)
 
 	return client
 }

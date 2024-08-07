@@ -10,12 +10,14 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-var connMySQL = types.ConnMySQLMax{
-	MaxOpenConns:    200,
-	MaxIdleConns:    100,
-	ConnmaxLifetime: 10,
-}
-var fullDbMySQL map[string][]*sql.DB
+var (
+	connMySQL = types.ConnMySQLMax{
+		MaxOpenConns:    200,
+		MaxIdleConns:    100,
+		ConnmaxLifetime: 10,
+	}
+	fullDbMySQL map[string][]*sql.DB
+)
 
 func (t *Tools) GetMySQLClient(key string) *sql.DB {
 	result := fullDbMySQL[key]
@@ -35,12 +37,12 @@ func (t *Tools) HandleMySQLClient() {
 		s := k + ".slave"
 
 		for _, addr := range v.Master {
-			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			clients := t.handleMySQLClient(addr, v.Username, v.Password, v.Database)
 			client[m] = append(client[m], clients)
 		}
 
 		for _, addr := range v.Slave {
-			clients := handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			clients := t.handleMySQLClient(addr, v.Username, v.Password, v.Database)
 			client[s] = append(client[s], clients)
 		}
 	}
@@ -51,8 +53,8 @@ func (t *Tools) HandleMySQLClient() {
 }
 
 // Timeout, read timeout, write timeout defaults to 1s
-func createMySQLClient(config types.OutConfMySQL) *sql.DB {
-	dsn := createDSN(config.Addr, config.Username, config.Password, config.Database)
+func (t *Tools) createMySQLClient(config types.OutConfMySQL) *sql.DB {
+	dsn := t.createDSN(config.Addr, config.Username, config.Password, config.Database)
 	db, err := sql.Open("mysql", dsn)
 
 	if err != nil {
@@ -72,7 +74,7 @@ func createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	return db
 }
 
-func handleMySQLClient(addr, username, password, database string) *sql.DB {
+func (t *Tools) handleMySQLClient(addr, username, password, database string) *sql.DB {
 	option := types.OutConfMySQL{
 		Addr:     addr,
 		Username: username,
@@ -80,13 +82,13 @@ func handleMySQLClient(addr, username, password, database string) *sql.DB {
 		Database: database,
 	}
 
-	client := createMySQLClient(option)
+	client := t.createMySQLClient(option)
 
 	return client
 }
 
 // Please adjust the connection, read, and write timeouts. The default is 1s.
-func createDSN(addr, user, passwd, dbname string) string {
+func (t *Tools) createDSN(addr, user, passwd, dbname string) string {
 	config := mysql.Config{
 		User:             user,                           // Username
 		Passwd:           passwd,                         // Password (requires User)

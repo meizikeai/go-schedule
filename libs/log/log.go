@@ -90,11 +90,11 @@ func (c *CreateLog) HandleLogger(app string) {
 	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 
 	if mode == "debug" {
-		errFile = filepath.Join(pwd, "../logs/error.log")
-		warFile = filepath.Join(pwd, "../logs/warn.log")
-		infFile = filepath.Join(pwd, "../logs/info.log")
-		debFile = filepath.Join(pwd, "../logs/debug.log")
-		traFile = filepath.Join(pwd, "../logs/trace.log")
+		errFile = filepath.Join(pwd, "/logs/error.log")
+		warFile = filepath.Join(pwd, "/logs/warn.log")
+		infFile = filepath.Join(pwd, "/logs/info.log")
+		debFile = filepath.Join(pwd, "/logs/debug.log")
+		traFile = filepath.Join(pwd, "/logs/trace.log")
 	}
 
 	hook := c.createHook(errFile, warFile, infFile, debFile, traFile)

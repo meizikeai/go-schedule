@@ -3,6 +3,7 @@
 .DS_Store
 .vscode
 
+go-schedule
 logs
 tmp
-go-schedule
+vendor

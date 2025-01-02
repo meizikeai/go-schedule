@@ -46,9 +46,9 @@ func NewCreateLog() *CreateLog {
 func (c *CreateLog) getLogger(file string) *lumberjack.Logger {
 	template := &lumberjack.Logger{
 		Filename:   file,
-		MaxSize:    100,   // Maximum log file split size, default 100 MB
-		MaxBackups: 10,    // Maximum number of old log files to keep
-		MaxAge:     15,    // Maximum number of days to keep old log files
+		MaxSize:    500,   // Maximum log file split size, default 100 MB
+		MaxBackups: 20,    // Maximum number of old log files to keep
+		MaxAge:     10,    // Maximum number of days to keep old log files
 		Compress:   false, // Whether to use gzip to compress and archive log files
 		LocalTime:  true,  // Whether to use local time, default UTC time
 	}
@@ -80,8 +80,7 @@ func (c *CreateLog) createHook(errFile, warFile, infFile, debFile, traFile strin
 }
 
 func (c *CreateLog) HandleLogger(app string) {
-	pwd, _ := os.Getwd()
-	mode := os.Getenv("GO_ENV")
+	mode := c.getMode()
 
 	errFile := filepath.Join("/data/logs/", app, "/error.log")
 	warFile := filepath.Join("/data/logs/", app, "/warn.log")
@@ -90,11 +89,13 @@ func (c *CreateLog) HandleLogger(app string) {
 	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 
 	if mode == "debug" {
-		errFile = filepath.Join(pwd, "/logs/error.log")
-		warFile = filepath.Join(pwd, "/logs/warn.log")
-		infFile = filepath.Join(pwd, "/logs/info.log")
-		debFile = filepath.Join(pwd, "/logs/debug.log")
-		traFile = filepath.Join(pwd, "/logs/trace.log")
+		pwd, _ := os.Getwd()
+
+		errFile = filepath.Join(pwd, "../logs/error.log")
+		warFile = filepath.Join(pwd, "../logs/warn.log")
+		infFile = filepath.Join(pwd, "../logs/info.log")
+		debFile = filepath.Join(pwd, "../logs/debug.log")
+		traFile = filepath.Join(pwd, "../logs/trace.log")
 	}
 
 	hook := c.createHook(errFile, warFile, infFile, debFile, traFile)
@@ -102,6 +103,11 @@ func (c *CreateLog) HandleLogger(app string) {
 	logrus.SetOutput(io.Discard)
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.AddHook(hook)
+}
+
+func (c *CreateLog) getMode() string {
+	mode := os.Getenv("GO_ENV")
+	return mode
 }
 
 type logger struct{}

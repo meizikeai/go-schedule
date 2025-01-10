@@ -4,46 +4,37 @@ import (
 	"context"
 	"time"
 
-	"go-schedule/config"
+	"go-schedule/libs/types"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var fullMongoDB map[string]*mongo.Client
-
-func (t *Tools) GetMongoCollection(key, database, table string) *mongo.Collection {
-	client := fullMongoDB[key]
-
-	db := client.Database(database)
-	collection := db.Collection(table)
-
-	return collection
+type MongoDB struct {
+	Client map[string]*mongo.Client
 }
 
-func (t *Tools) HandleMongoDBClient() {
-	clients := make(map[string]*mongo.Client)
+func NewMongoDB(data map[string]types.ConfMongoDB) *MongoDB {
+	client := make(map[string]*mongo.Client, 0)
 
-	local := config.GetMongodbConfig()
-
-	for k, v := range local {
+	for k, v := range data {
 		m := k + ".master"
 		s := k + ".slave"
 
-		master := t.createMongoDBClient(v.Master)
-		clients[m] = master
+		master := createMongoDBClient(v.Master)
+		client[m] = master
 
-		slave := t.createMongoDBClient(v.Slave)
-		clients[s] = slave
+		slave := createMongoDBClient(v.Slave)
+		client[s] = slave
 	}
 
-	fullMongoDB = clients
-
-	t.Stdout("MongoDB is Connected")
+	return &MongoDB{
+		Client: client,
+	}
 }
 
-func (t *Tools) createMongoDBClient(uri string) *mongo.Client {
-	ctx, cancel := t.mongoConfig()
+func createMongoDBClient(uri string) *mongo.Client {
+	ctx, cancel := mongoConfig()
 	defer cancel()
 
 	config := options.Client().ApplyURI(uri)
@@ -66,19 +57,17 @@ func (t *Tools) createMongoDBClient(uri string) *mongo.Client {
 	return client
 }
 
-func (t *Tools) mongoConfig() (context.Context, context.CancelFunc) {
+func mongoConfig() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
 	return ctx, cancel
 }
 
-func (t *Tools) CloseMongoDB() {
-	for _, v := range fullMongoDB {
+func (t *MongoDB) Close() {
+	for _, v := range t.Client {
 		err := v.Disconnect(context.TODO())
 
 		if err != nil {
 			// panic(err)
 		}
 	}
-
-	t.Stdout("MongoDB is Close")
 }

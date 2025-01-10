@@ -1,38 +1,33 @@
 package tool
 
 import (
-	"fmt"
 	"strings"
-
-	"go-schedule/config"
 
 	"github.com/IBM/sarama"
 )
 
-// producer
-type KafkaProducer struct{}
+// tools.SendKafkaProducerMessage("broker", "topic", "sync", "test")
+// tools.HandlerKafkaConsumerMessage("broker", "topic")
 
-func NewKafkaProducer() *KafkaProducer {
-	return &KafkaProducer{}
+// kafka producer
+type KafkaProducer struct {
+	Client map[string]sarama.AsyncProducer
 }
 
-var fullProducerKafka map[string]sarama.AsyncProducer
+func NewKafkaProducer(data map[string]string) *KafkaProducer {
+	client := make(map[string]sarama.AsyncProducer, 0)
 
-func (t *Tools) HandleKafkaProducerClient() {
-	config := config.GetKafkaConfig()
-	result := make(map[string]sarama.AsyncProducer, len(config))
-
-	for k, v := range config {
+	for k, v := range data {
 		addr := strings.Split(v, ",")
-		result[k] = t.createKafkaProducerClient(addr)
+		client[k] = createKafkaProducerClient(addr)
 	}
 
-	fullProducerKafka = result
-
-	t.Stdout("Kafka is Connected")
+	return &KafkaProducer{
+		Client: client,
+	}
 }
 
-func (t *Tools) createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {
+func createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer {
 	config := sarama.NewConfig()
 	config.Producer.Return.Errors = false
 	config.Producer.Return.Successes = false
@@ -40,99 +35,48 @@ func (t *Tools) createKafkaProducerClient(kfkConf []string) sarama.AsyncProducer
 	producer, err := sarama.NewAsyncProducer(kfkConf, config)
 
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	return producer
 }
 
-func (kp *KafkaProducer) GetKafkaProducerClient(key string) sarama.AsyncProducer {
-	result := fullProducerKafka[key]
-	return result
-}
-
-// demo
-func (kp *KafkaProducer) SendKafkaProducerMessage(broker, topic, key, data string) {
-	producer := kp.GetKafkaProducerClient(broker)
-
-	message := &sarama.ProducerMessage{
-		Topic: topic,
-		Key:   sarama.StringEncoder(key),
-		Value: sarama.StringEncoder(data),
+func (k *KafkaProducer) Close() {
+	for _, v := range k.Client {
+		v.Close()
 	}
-
-	producer.Input() <- message
 }
 
-// consumer
-type KafkaConsumer struct{}
-
-func NewKafkaConsumer() *KafkaConsumer {
-	return &KafkaConsumer{}
+// kafka consumer
+type KafkaConsumer struct {
+	Client map[string]sarama.Consumer
 }
 
-var fullConsumerKafka map[string]sarama.Consumer
+func NewKafkaConsumer(data map[string]string) *KafkaConsumer {
+	client := make(map[string]sarama.Consumer, 0)
 
-func (t *Tools) HandleKafkaConsumerClient() {
-	config := config.GetKafkaConfig()
-	result := make(map[string]sarama.Consumer, len(config))
-
-	for k, v := range config {
+	for k, v := range data {
 		addr := strings.Split(v, ",")
-		result[k] = t.createKafkaConsumerClient(addr)
+		client[k] = createKafkaConsumerClient(addr)
 	}
 
-	fullConsumerKafka = result
+	return &KafkaConsumer{
+		Client: client,
+	}
 }
 
-func (t *Tools) createKafkaConsumerClient(kfkConf []string) sarama.Consumer {
+func createKafkaConsumerClient(kfkConf []string) sarama.Consumer {
 	consumer, err := sarama.NewConsumer(kfkConf, nil)
 
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	return consumer
 }
 
-func (kc *KafkaConsumer) GetKafkaConsumerClient(key string) sarama.Consumer {
-	result := fullConsumerKafka[key]
-	return result
-}
-
-// demo
-func (kc *KafkaConsumer) HandlerKafkaConsumerMessage(broker, topic string) {
-	consumer := kc.GetKafkaConsumerClient(broker)
-	partitionList, err := consumer.Partitions(topic)
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	for partition := range partitionList {
-		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetNewest)
-
-		if err != nil {
-			fmt.Printf("failed to start consumer for partition %d,err:%v\n", partition, err)
-			return
-		}
-
-		go func(sarama.PartitionConsumer) {
-			for msg := range pc.Messages() {
-				fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v", msg.Partition, msg.Offset, msg.Key, string(msg.Value))
-			}
-		}(pc)
-	}
-}
-
-func (t *Tools) CloseKafka() {
-	for _, v := range fullProducerKafka {
+func (k *KafkaConsumer) Close() {
+	for _, v := range k.Client {
 		v.Close()
 	}
-
-	for _, v := range fullConsumerKafka {
-		v.Close()
-	}
-
-	t.Stdout("Kafka is Close")
 }

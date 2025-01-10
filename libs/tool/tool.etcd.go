@@ -8,19 +8,11 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
-type etcdType struct {
+type EtchType struct {
 	Client *etcd.Client
 }
 
-var etcdServer etcdType
-
-func init() {
-	// // not use
-	// config := config.GetEtcdConfig()
-	// etcdServer.Client = newEtcdServer(config.Address, config.Username, config.Password)
-}
-
-func newEtcdServer(address []string, username, password string) *etcd.Client {
+func NewEtcdServer(address []string, username, password string) *EtchType {
 	config := etcd.Config{
 		Endpoints:   address,
 		Username:    username,
@@ -34,10 +26,12 @@ func newEtcdServer(address []string, username, password string) *etcd.Client {
 		panic(err)
 	}
 
-	return client
+	return &EtchType{
+		Client: client,
+	}
 }
 
-func (e *etcdType) Put(key, value string) {
+func (e *EtchType) Put(key, value string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	_, err := e.Client.Put(ctx, key, value)
 	cancel()
@@ -47,7 +41,7 @@ func (e *etcdType) Put(key, value string) {
 	}
 }
 
-func (e *etcdType) Get(key string) string {
+func (e *EtchType) Get(key string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	res, err := e.Client.Get(ctx, key)
 	cancel()

@@ -6,35 +6,28 @@ import (
 	"net/http"
 	"time"
 
-	"go-schedule/config"
+	"go-schedule/libs/types"
 
 	"github.com/elastic/go-elasticsearch/v8"
 )
 
-var fullElasticSearch map[string][]*elasticsearch.Client
-
-func (t *Tools) GetElasticSearchClient(key string) *elasticsearch.Client {
-	result := fullElasticSearch[key]
-	count := t.GetRandmod(len(result))
-
-	return result[count]
+type ElasticSearch struct {
+	Client map[string][]*elasticsearch.Client
 }
 
-func (t *Tools) HandleElasticSearchClient() {
+func NewElasticSearch(data map[string]types.ConfElasticSearch) *ElasticSearch {
 	client := make(map[string][]*elasticsearch.Client)
 
-	local := config.GetElasticSearchConfig()
-
-	for k, v := range local {
+	for k, v := range data {
 		m := k + ".master"
 
 		clients := createElasticSearchClient(v.Address, v.Username, v.Password)
 		client[m] = append(client[m], clients)
 	}
 
-	fullElasticSearch = client
-
-	t.Stdout("ElasticSearch is Connected")
+	return &ElasticSearch{
+		Client: client,
+	}
 }
 
 func createElasticSearchClient(address []string, username, password string) *elasticsearch.Client {
@@ -67,13 +60,11 @@ func createElasticSearchClient(address []string, username, password string) *ela
 	return client
 }
 
-func (t *Tools) CloseElasticSearch() {
-	// for _, val := range fullElasticSearch {
+func (e *ElasticSearch) Close() {
+	// for _, val := range e.Client {
 	// 	for _, v := range val {
 	// 		// Can't find a way to close it
 	// 		v.Close()
 	// 	}
 	// }
-
-	t.Stdout("ElasticSearch is Close")
 }

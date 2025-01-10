@@ -4,66 +4,62 @@ import (
 	"database/sql"
 	"time"
 
-	"go-schedule/config"
 	"go-schedule/libs/types"
 
 	"github.com/go-sql-driver/mysql"
 )
 
-var (
-	connMySQL = types.ConnMySQLMax{
-		MaxOpenConns:    200,
-		MaxIdleConns:    100,
-		ConnmaxLifetime: 10,
-	}
-	fullDbMySQL map[string][]*sql.DB
-)
-
-func (t *Tools) GetMySQLClient(key string) *sql.DB {
-	result := fullDbMySQL[key]
-	count := t.GetRandmod(len(result))
-
-	return result[count]
+type configMySQL struct {
+	MaxOpenConns    int   `json:"max_open_conns"`
+	MaxIdleConns    int   `json:"max_idle_conns"`
+	ConnmaxLifetime int64 `json:"conn_max_life_time"`
 }
 
-func (t *Tools) HandleMySQLClient() {
-	client := make(map[string][]*sql.DB)
+type MySQL struct {
+	Client map[string][]*sql.DB
+}
 
-	// local := getMySQLConfig()
-	local := config.GetMySQLConfig()
+var option = configMySQL{
+	MaxOpenConns:    200,
+	MaxIdleConns:    100,
+	ConnmaxLifetime: 10,
+}
 
-	for k, v := range local {
+func NewMySQLClient(data map[string]types.ConfMySQL) *MySQL {
+	client := make(map[string][]*sql.DB, 0)
+
+	for k, v := range data {
 		m := k + ".master"
 		s := k + ".slave"
 
 		for _, addr := range v.Master {
-			clients := t.handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			clients := createMySQLClient(addr, v.Username, v.Password, v.Database)
 			client[m] = append(client[m], clients)
 		}
 
 		for _, addr := range v.Slave {
-			clients := t.handleMySQLClient(addr, v.Username, v.Password, v.Database)
+			clients := createMySQLClient(addr, v.Username, v.Password, v.Database)
 			client[s] = append(client[s], clients)
 		}
 	}
 
-	fullDbMySQL = client
-
-	t.Stdout("MySQL is Connected")
+	return &MySQL{
+		Client: client,
+	}
 }
 
 // Timeout, read timeout, write timeout defaults to 1s
-func (t *Tools) createMySQLClient(config types.OutConfMySQL) *sql.DB {
-	dsn := t.createDSN(config.Addr, config.Username, config.Password, config.Database)
+func createMySQLClient(addr, username, password, database string) *sql.DB {
+	dsn := createDSN(addr, username, password, database)
 	db, err := sql.Open("mysql", dsn)
 
 	if err != nil {
 		panic(err)
 	}
 
-	db.SetMaxOpenConns(connMySQL.MaxOpenConns)
-	db.SetMaxIdleConns(connMySQL.MaxIdleConns)
-	db.SetConnMaxLifetime(time.Duration(connMySQL.ConnmaxLifetime) * time.Second)
+	db.SetMaxOpenConns(option.MaxOpenConns)
+	db.SetMaxIdleConns(option.MaxIdleConns)
+	db.SetConnMaxLifetime(time.Duration(option.ConnmaxLifetime) * time.Second)
 
 	err = db.Ping()
 
@@ -74,21 +70,8 @@ func (t *Tools) createMySQLClient(config types.OutConfMySQL) *sql.DB {
 	return db
 }
 
-func (t *Tools) handleMySQLClient(addr, username, password, database string) *sql.DB {
-	option := types.OutConfMySQL{
-		Addr:     addr,
-		Username: username,
-		Password: password,
-		Database: database,
-	}
-
-	client := t.createMySQLClient(option)
-
-	return client
-}
-
 // Please adjust the connection, read, and write timeouts. The default is 1s.
-func (t *Tools) createDSN(addr, user, passwd, dbname string) string {
+func createDSN(addr, user, passwd, dbname string) string {
 	config := mysql.Config{
 		User:             user,                           // Username
 		Passwd:           passwd,                         // Password (requires User)
@@ -108,12 +91,10 @@ func (t *Tools) createDSN(addr, user, passwd, dbname string) string {
 	return config.FormatDSN()
 }
 
-func (t *Tools) CloseMySQL() {
-	for _, val := range fullDbMySQL {
+func (m *MySQL) Close() {
+	for _, val := range m.Client {
 		for _, v := range val {
 			v.Close()
 		}
 	}
-
-	t.Stdout("MySQL is Close")
 }

@@ -1,75 +1,38 @@
 package tool
 
 import (
-	"go-schedule/config"
 	"go-schedule/libs/types"
 
 	"gopkg.in/gomail.v2"
 )
 
-var oneMail map[string]gomail.SendCloser
-
-func (t *Tools) GetMailClient(key string) gomail.SendCloser {
-	return oneMail[key]
+type Email struct {
+	Client map[string]gomail.SendCloser
 }
 
-func (t *Tools) HandleMailClient() {
-	clients := make(map[string]gomail.SendCloser)
+func NewEmail(data map[string]types.ConfMail) *Email {
+	client := make(map[string]gomail.SendCloser)
 
-	local := config.GetMailConfig()
+	for k, v := range data {
+		dialer := gomail.NewDialer(v.Host, v.Port, v.Username, v.Password)
+		dialer.SSL = true
 
-	for k, v := range local {
-		client := gomail.NewDialer(v.Host, v.Port, v.Username, v.Password)
-		client.SSL = true
-
-		d, err := client.Dial()
+		d, err := dialer.Dial()
 
 		if err != nil {
 			panic(err)
 		}
 
-		clients[k] = d
+		client[k] = d
 	}
 
-	oneMail = clients
-
-	t.Stdout("Mail Dialer is Connected")
-}
-
-func (t *Tools) CloseMail() {
-	var err error
-
-	for _, v := range oneMail {
-		err = v.Close()
-
-		if err != nil {
-			break
-		}
-	}
-
-	if err != nil {
-		t.Stdout("Mail Dialer is Close")
+	return &Email{
+		Client: client,
 	}
 }
 
-func (t *Tools) CreateMailMessage(e *types.MailMessage) *gomail.Message {
-	m := gomail.NewMessage()
-
-	if len(e.Cc) > 0 {
-		m.SetHeader("Cc", e.Cc...)
+func (e *Email) Close() {
+	for _, v := range e.Client {
+		v.Close()
 	}
-
-	for _, v := range e.File {
-		m.Attach(v)
-	}
-
-	m.SetHeader("From", e.From)
-	m.SetHeader("To", e.To...)
-	m.SetHeader("Subject", e.Subject)
-	m.SetBody(
-		"text/html",
-		e.Data,
-	)
-
-	return m
 }

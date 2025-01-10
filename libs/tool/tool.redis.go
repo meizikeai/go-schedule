@@ -5,52 +5,76 @@ import (
 	"runtime"
 	"time"
 
-	"go-schedule/config"
 	"go-schedule/libs/types"
 
 	"github.com/go-redis/redis/v8"
 )
 
-var (
-	connRedis = types.OutConfRedis{
-		MaxRetries:         3,
-		PoolSize:           20,
-		MinIdleConns:       10,
-		DialTimeout:        5,
-		ReadTimeout:        500,
-		WriteTimeout:       500,
-		IdleTimeout:        300,
-		IdleCheckFrequency: 60,
-	}
-	fullDbRedis map[string][]*redis.Client
-)
-
-func (t *Tools) GetRedisClient(key string) *redis.Client {
-	result := fullDbRedis[key]
-	count := t.GetRandmod(len(result))
-
-	return result[count]
+type configRedis struct {
+	Addr               string `json:"addr"`
+	Username           string `json:"username"`
+	Password           string `json:"password"`
+	DB                 int    `json:"db"`
+	MaxRetries         int    `json:"max_retries"`
+	PoolSize           int    `json:"pool_size"`
+	MinIdleConns       int    `json:"min_idle_conns"`
+	DialTimeout        int    `json:"dial_timeout"`
+	ReadTimeout        int    `json:"read_timeout"`
+	WriteTimeout       int    `json:"write_timeout"`
+	IdleTimeout        int    `json:"idle_timeout"`
+	IdleCheckFrequency int    `json:"idle_check_frequency"`
 }
 
-func (t *Tools) HandleRedisClient() {
+type Redis struct {
+	Client map[string][]*redis.Client
+}
+
+var connRedis = configRedis{
+	MaxRetries:         3,
+	PoolSize:           20,
+	MinIdleConns:       10,
+	DialTimeout:        5,
+	ReadTimeout:        500,
+	WriteTimeout:       500,
+	IdleTimeout:        300,
+	IdleCheckFrequency: 60,
+}
+
+func NewRedisClient(data map[string]types.ConfRedis) *Redis {
 	client := make(map[string][]*redis.Client)
 
-	// local := getRedisConfig()
-	local := config.GetRedisConfig()
-
-	for k, v := range local {
+	for k, v := range data {
 		for _, addr := range v.Master {
-			clients := t.handleRedisClient(addr, v.Password, v.Db)
+			clients := handleRedisClient(addr, v.Password, v.Db)
 			client[k] = append(client[k], clients)
 		}
 	}
 
-	fullDbRedis = client
-
-	t.Stdout("Redis is Connected")
+	return &Redis{
+		Client: client,
+	}
 }
 
-func (t *Tools) createRedisClient(config types.OutConfRedis) *redis.Client {
+func handleRedisClient(addr, password string, db int) *redis.Client {
+	option := configRedis{
+		Addr:               addr,
+		Password:           password,
+		DB:                 db,
+		MaxRetries:         connRedis.MaxRetries,
+		PoolSize:           connRedis.PoolSize * runtime.NumCPU(),
+		MinIdleConns:       connRedis.MinIdleConns * runtime.NumCPU(),
+		ReadTimeout:        connRedis.ReadTimeout,
+		WriteTimeout:       connRedis.WriteTimeout,
+		IdleTimeout:        connRedis.IdleTimeout,
+		IdleCheckFrequency: connRedis.IdleCheckFrequency,
+	}
+
+	client := createRedisClient(option)
+
+	return client
+}
+
+func createRedisClient(config configRedis) *redis.Client {
 	db := redis.NewClient(&redis.Options{
 		Addr:               config.Addr,
 		Username:           config.Username,
@@ -76,31 +100,10 @@ func (t *Tools) createRedisClient(config types.OutConfRedis) *redis.Client {
 	return db
 }
 
-func (t *Tools) handleRedisClient(addr, password string, db int) *redis.Client {
-	option := types.OutConfRedis{
-		Addr:               addr,
-		Password:           password,
-		DB:                 db,
-		MaxRetries:         connRedis.MaxRetries,
-		PoolSize:           connRedis.PoolSize * runtime.NumCPU(),
-		MinIdleConns:       connRedis.MinIdleConns * runtime.NumCPU(),
-		ReadTimeout:        connRedis.ReadTimeout,
-		WriteTimeout:       connRedis.WriteTimeout,
-		IdleTimeout:        connRedis.IdleTimeout,
-		IdleCheckFrequency: connRedis.IdleCheckFrequency,
-	}
-
-	client := t.createRedisClient(option)
-
-	return client
-}
-
-func (t *Tools) CloseRedis() {
-	for _, val := range fullDbRedis {
+func (r *Redis) Close() {
+	for _, val := range r.Client {
 		for _, v := range val {
 			v.Close()
 		}
 	}
-
-	t.Stdout("Redis is Close")
 }

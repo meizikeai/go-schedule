@@ -2,7 +2,7 @@ package config
 
 import "go-schedule/libs/types"
 
-var mailConfig = map[string]types.ConMail{
+var mailConfig = map[string]types.ConfMail{
 	"mail-test": {
 		Host:     "smtp.example.com",
 		Port:     465,
@@ -17,8 +17,8 @@ var mailConfig = map[string]types.ConMail{
 	},
 }
 
-func GetMailConfig() map[string]types.ConMail {
-	result := map[string]types.ConMail{}
+func GetMailConfig() map[string]types.ConfMail {
+	result := map[string]types.ConfMail{}
 
 	data := []string{
 		"mail",

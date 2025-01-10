@@ -1,4 +1,4 @@
-package fetch
+package tool
 
 import (
 	"bytes"

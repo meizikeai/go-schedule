@@ -4,23 +4,22 @@ import (
 	"os"
 
 	"go-schedule/crontab"
-	"go-schedule/libs/log"
 	"go-schedule/libs/tool"
 )
 
 var (
-	// rules = tool.NewRegexp()
-	// share = tool.NewShare()
-	tasks = crontab.NewTasks()
+	// chaos  = tool.NewSecret()
+	daily = tool.NewCreateLog()
+	// jwt    = tool.NewJsonWebToken()
+	lion   = tool.NewFetch()
+	logger = tool.NewLogger()
+	// rules  = tool.NewRegexp()
+	// share  = tool.NewShare()
 	tools = tool.NewTools()
-	// units = tool.NewUnits()
-	// chaos  = secret.NewSecret()
-	daily = log.NewCreateLog()
+	units = tool.NewUnits()
+	// logic = controllers.NewLogic()
+	tasks = crontab.NewTasks()
 	// fetch  = models.NewModelsFetch()
-	// jwt    = token.NewJsonWebToken()
-	// lion   = fetch.NewFetch()
-	// logger = log.NewLogger()
-	// logic  = controllers.NewLogic()
 	// kafkaProducer = tool.NewKafkaProducer()
 	// kafkaConsumer = tool.NewKafkaConsumer()
 )
@@ -59,12 +58,6 @@ func main() {
 	// checking
 	check := tools.HandleCron("0 10 */1 * *", tasks.HandleCheck())
 	defer check.Stop()
-
-	// kafka producer
-	// kafkaProducer.SendKafkaProducerMessage("broker", "topic", "sync", "test")
-
-	// kafka consumer
-	// kafkaConsumer.HandlerKafkaConsumerMessage("broker", "topic")
 
 	select {}
 }

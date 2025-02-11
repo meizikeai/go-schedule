@@ -143,7 +143,7 @@ func (t *Tools) GetConfigData(key string) string {
 
 // zookeeper
 func (t *Tools) HandleZookeeperClient() {
-	servers := config.GetZookeeperConfig()
+	servers := config.GetZookeeperConfig("zookeeper")
 	zookeeper := NewZookeeper(servers)
 
 	for key, val := range config.ZookeeperConfig {
@@ -314,15 +314,19 @@ func (t *Tools) HandlerKafkaConsumerMessage(broker, topic string) {
 }
 
 func (t *Tools) CloseKafka() {
-	for _, v := range kafkaProducer {
-		v.Close()
+	if len(kafkaProducer) > 0 {
+		for _, v := range kafkaProducer {
+			v.Close()
+		}
+		t.Stdout("Kafka Producer is Close")
 	}
-	t.Stdout("Kafka Producer is Close")
 
-	for _, v := range kafkaConsumer {
-		v.Close()
+	if len(kafkaConsumer) > 0 {
+		for _, v := range kafkaConsumer {
+			v.Close()
+		}
+		t.Stdout("Kafka Consumer is Close")
 	}
-	t.Stdout("Kafka Consumer is Close")
 }
 
 // mongodb

@@ -94,13 +94,13 @@ $ supervisorctl status
 
 **Go 语言设计与实现**
 
-  + https://draveness.me/golang
++ https://draveness.me/golang
 
 **幼麟实验室 Golang 合辑**
 
-  + https://space.bilibili.com/567195437
++ https://space.bilibili.com/567195437
 
 **Golang Example**
 
-  + https://gobyexample.com
-  + https://gowebexamples.com
++ https://gobyexample.com
++ https://gowebexamples.com

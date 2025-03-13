@@ -34,6 +34,7 @@ func init() {
 	// tools.HandleElasticSearchClient()
 	// tools.HandleKafkaProducerClient()
 	// tools.HandleKafkaConsumerClient()
+	// tools.HandleKafkaConsumerGroupClient()
 
 	daily.HandleLogger("go-schedule")
 }

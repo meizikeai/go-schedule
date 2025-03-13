@@ -28,7 +28,7 @@ func GetMode() string {
 	return mode
 }
 
-func isProduction() bool {
+func IsProduction() bool {
 	mode := GetMode()
 	result := false
 

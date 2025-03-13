@@ -190,3 +190,8 @@ func (u *Units) StringToArray(data string) []string {
 
 	return result
 }
+
+func (u *Units) FloatToString(data float64) string {
+	result := strconv.FormatFloat(data, 'f', 2, 64)
+	return result
+}

@@ -37,3 +37,10 @@ type ConfMail struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type ConfigKafkaConsumerCroup struct {
+	Assignor string `json:"assignor"`
+	GroupId  string `json:"group_id"`
+	Oldest   bool   `json:"oldest"`
+	Version  string `json:"version"`
+}

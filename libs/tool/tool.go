@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math/big"
+	"os"
 	"time"
 
 	"go-schedule/config"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/go-mysql-org/go-mysql/canal"
+	"github.com/go-mysql-org/go-mysql/replication"
 	"github.com/go-redis/redis/v8"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,17 +22,20 @@ import (
 )
 
 var (
-	dbMySQLCache    map[string][]*sql.DB
-	dbRedisCache    map[string][]*redis.Client
-	dbMongoDBCache  map[string]*mongo.Client
-	zookeeperMySQL  map[string]types.ConfMySQL
-	zookeeperRedis  map[string]types.ConfRedis
-	zookeeperApi    map[string][]string
-	zookeeperConfig map[string]string
-	esClient        map[string][]*elasticsearch.Client
-	kafkaProducer   map[string]sarama.AsyncProducer
-	kafkaConsumer   map[string]sarama.Consumer
-	emailClient     map[string]gomail.SendCloser
+	dbMySQLCache            map[string][]*sql.DB
+	dbMySQLReplicationCache map[string]*replication.BinlogSyncer
+	dbMySQLCanalCache       map[string]*canal.Canal
+	dbRedisCache            map[string][]*redis.Client
+	dbMongoDBCache          map[string]*mongo.Client
+	zookeeperMySQL          map[string]types.ConfMySQL
+	zookeeperRedis          map[string]types.ConfRedis
+	zookeeperApi            map[string][]string
+	zookeeperConfig         map[string]string
+	esClient                map[string][]*elasticsearch.Client
+	kafkaProducer           map[string]sarama.AsyncProducer
+	kafkaConsumer           map[string]sarama.Consumer
+	kafkaConsumerGroup      map[string]sarama.ConsumerGroup
+	emailClient             map[string]gomail.SendCloser
 )
 
 type Tools struct{}
@@ -51,6 +57,14 @@ func (t *Tools) GetRandmod(length int) int64 {
 
 func (t *Tools) GetTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
+}
+
+func GetAppName() string {
+	return os.Getenv("CS_APP")
+}
+
+func GetGoEnv() string {
+	return os.Getenv("GO_ENV")
 }
 
 // crontab
@@ -93,6 +107,34 @@ func (t *Tools) CloseMySQL() {
 	}
 
 	t.Stdout("MySQL is Close")
+}
+
+// mysql binlog - replication
+func (t *Tools) GetReplicationMySQLClient(key string) *replication.BinlogSyncer {
+	return dbMySQLReplicationCache[key]
+}
+
+func (t *Tools) HandleReplicationMySQLClient() {
+	config := config.GetBinlogConfig()
+	result := NewReplicationMySQLClient(config)
+
+	dbMySQLReplicationCache = result.Client
+
+	t.Stdout("MySQL Binlog Replication is Connected")
+}
+
+// mysql binlog - canal
+func (t *Tools) GetCanalMySQLClient(key string) *canal.Canal {
+	return dbMySQLCanalCache[key]
+}
+
+func (t *Tools) HandleCanalMySQLClient() {
+	config := config.GetCanalConfig()
+	result := NewCanalMySQLClient(config)
+
+	dbMySQLCanalCache = result.Client
+
+	t.Stdout("MySQL Binlog Canal is Connected")
 }
 
 // redis
@@ -264,22 +306,15 @@ func (t *Tools) HandleKafkaProducerClient() {
 	t.Stdout("Kafka Producer is Connected")
 }
 
-func (t *Tools) SendKafkaProducerMessage(broker, topic, data string) {
-	producer := kafkaProducer[broker]
-
-	if producer == nil {
-		return
+func (t *Tools) GetKafkaProducerClient(broker string) sarama.AsyncProducer {
+	if kafkaProducer[broker] == nil {
+		panic("Kafka Producer is not connected")
 	}
 
-	message := &sarama.ProducerMessage{
-		Topic: topic,
-		Key:   nil,
-		Value: sarama.StringEncoder(data),
-	}
-
-	producer.Input() <- message
+	return kafkaProducer[broker]
 }
 
+// kafka consumer
 func (t *Tools) HandleKafkaConsumerClient() {
 	config := config.GetKafkaConfig()
 	result := NewKafkaConsumer(config)
@@ -289,28 +324,30 @@ func (t *Tools) HandleKafkaConsumerClient() {
 	t.Stdout("Kafka Consumer is Connected")
 }
 
-func (t *Tools) HandlerKafkaConsumerMessage(broker, topic string) {
-	consumer := kafkaConsumer[broker]
-	partitionList, err := consumer.Partitions(topic)
-
-	if err != nil {
-		panic(err)
+func (t *Tools) GetKafkaConsumerClient(broker string) sarama.Consumer {
+	if kafkaConsumer[broker] == nil {
+		panic("Kafka Consumer is not connected")
 	}
 
-	for partition := range partitionList {
-		pc, err := consumer.ConsumePartition(topic, int32(partition), sarama.OffsetNewest)
+	return kafkaConsumer[broker]
+}
 
-		if err != nil {
-			fmt.Printf("failed to start consumer for partition %d,err:%v\n", partition, err)
-			return
-		}
+// kafka consumer group
+func (t *Tools) HandleKafkaConsumerGroupClient() {
+	config := config.GetKafkaConfig()
+	result := NewKafkaConsumerGroup(config)
 
-		go func(sarama.PartitionConsumer) {
-			for msg := range pc.Messages() {
-				fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v\n", msg.Partition, msg.Offset, msg.Key, string(msg.Value))
-			}
-		}(pc)
+	kafkaConsumerGroup = result.Client
+
+	t.Stdout("Kafka Consumer Group is Connected")
+}
+
+func (t *Tools) GetKafkaConsumerGroupClient(broker string) sarama.ConsumerGroup {
+	if kafkaConsumerGroup[broker] == nil {
+		panic("Kafka Consumer Group  is not connected")
 	}
+
+	return kafkaConsumerGroup[broker]
 }
 
 func (t *Tools) CloseKafka() {
@@ -326,6 +363,13 @@ func (t *Tools) CloseKafka() {
 			v.Close()
 		}
 		t.Stdout("Kafka Consumer is Close")
+	}
+
+	if len(kafkaConsumerGroup) > 0 {
+		for _, v := range kafkaConsumerGroup {
+			v.Close()
+		}
+		t.Stdout("Kafka Consumer Group is Close")
 	}
 }
 

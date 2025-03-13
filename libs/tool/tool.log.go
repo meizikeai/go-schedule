@@ -1,7 +1,6 @@
 package tool
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
@@ -80,15 +79,13 @@ func (c *CreateLog) createHook(errFile, warFile, infFile, debFile, traFile strin
 }
 
 func (c *CreateLog) HandleLogger(app string) {
-	mode := c.getMode()
-
 	errFile := filepath.Join("/data/logs/", app, "/error.log")
 	warFile := filepath.Join("/data/logs/", app, "/warn.log")
 	infFile := filepath.Join("/data/logs/", app, "/info.log")
 	debFile := filepath.Join("/data/logs/", app, "/debug.log")
 	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 
-	if mode == "debug" {
+	if GetGoEnv() == "debug" {
 		pwd, _ := os.Getwd()
 
 		errFile = filepath.Join(pwd, "../logs/error.log")
@@ -105,43 +102,28 @@ func (c *CreateLog) HandleLogger(app string) {
 	logrus.AddHook(hook)
 }
 
-func (c *CreateLog) getMode() string {
-	mode := os.Getenv("GO_ENV")
-	return mode
-}
-
 type logger struct{}
 
 func NewLogger() *logger {
 	return &logger{}
 }
 
-func (l *logger) HandleErrorLogging(data any) {
-	logrus.Error(l.marshalJson(data))
+func (l *logger) Error(args ...any) {
+	logrus.Error(args...)
 }
 
-func (l *logger) HandleWarnLogging(data any) {
-	logrus.Warn(l.marshalJson(data))
+func (l *logger) Warn(args ...any) {
+	logrus.Warn(args...)
 }
 
-func (l *logger) HandleInfoLogging(data any) {
-	logrus.Info(l.marshalJson(data))
+func (l *logger) Info(args ...any) {
+	logrus.Info(args...)
 }
 
-func (l *logger) HandleDebugLogging(data any) {
-	logrus.Debug(l.marshalJson(data))
+func (l *logger) Debug(args ...any) {
+	logrus.Debug(args...)
 }
 
-func (l *logger) HandleTraceLogging(data any) {
-	logrus.Trace(l.marshalJson(data))
-}
-
-func (l *logger) marshalJson(date any) string {
-	res, err := json.Marshal(date)
-
-	if err != nil {
-		return ""
-	}
-
-	return string(res)
+func (l *logger) Trace(args ...any) {
+	logrus.Trace(args...)
 }

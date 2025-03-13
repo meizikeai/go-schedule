@@ -104,3 +104,8 @@ $ supervisorctl status
 
 + https://gobyexample.com
 + https://gowebexamples.com
+
+
+## 未用的库
+
++ https://github.com/nxadm/tail - Go package for reading from continuously updated files

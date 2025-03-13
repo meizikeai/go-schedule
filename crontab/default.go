@@ -6,6 +6,7 @@ import (
 
 	"go-schedule/config"
 	"go-schedule/libs/tool"
+	"go-schedule/models"
 )
 
 type Tasks struct{}
@@ -14,7 +15,12 @@ func NewTasks() *Tasks {
 	return &Tasks{}
 }
 
-var tools = tool.NewTools()
+var (
+	tools = tool.NewTools()
+	units = tool.NewUnits()
+	mysql = models.NewModelsMySQL()
+	redis = models.NewModelsRedis()
+)
 
 func (t *Tasks) HandleRun() {
 	pid := os.Getpid()

@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +9,8 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"go-schedule/libs/tool"
 
 	"github.com/IBM/sarama"
 )
@@ -24,6 +25,7 @@ func (m *ModelsKafka) SendKafkaProducerMessage(broker, topic, data string) {
 	producer := tools.GetKafkaProducerClient(broker)
 
 	if producer == nil {
+		log.Fatalf("kafka producer is not connected")
 		return
 	}
 
@@ -36,12 +38,12 @@ func (m *ModelsKafka) SendKafkaProducerMessage(broker, topic, data string) {
 	producer.Input() <- message
 }
 
-func (m *ModelsKafka) ReadKafkaConsumerMessage(broker, topic string) {
+func (m *ModelsKafka) HandlerKafkaConsumerMessage(broker, topic string) {
 	consumer := tools.GetKafkaConsumerClient(broker)
 	partitionList, err := consumer.Partitions(topic)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Panicf("error get partition: %v", err)
 		return
 	}
 
@@ -62,14 +64,12 @@ func (m *ModelsKafka) ReadKafkaConsumerMessage(broker, topic string) {
 }
 
 // https://github.com/IBM/sarama/blob/main/examples/consumergroup/main.go
-func (m *ModelsKafka) ReadKafkaConsumerGroupMessage() {
+func (m *ModelsKafka) ReadKafkaConsumerGroupMessage(callback func([]byte) error) {
 	keepRunning := true
 	tools.Stdout("Starting a new Sarama consumer")
 
 	// Setup a new Sarama consumer group
-	consumer := Consumer{
-		ready: make(chan bool),
-	}
+	consumer := tool.NewKafkaConsumerGroupConsumer(callback)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	client := tools.GetKafkaConsumerGroupClient("default")
@@ -86,7 +86,7 @@ func (m *ModelsKafka) ReadKafkaConsumerGroupMessage() {
 			// `Consume` should be called inside an infinite loop, when a
 			// server-side rebalance happens, the consumer session will need to be
 			// recreated to get the new claims
-			if err := client.Consume(ctx, []string{"nyx_traffic"}, &consumer); err != nil {
+			if err := client.Consume(ctx, []string{"nyx_traffic"}, consumer); err != nil {
 				if errors.Is(err, sarama.ErrClosedConsumerGroup) {
 					return
 				}
@@ -98,11 +98,11 @@ func (m *ModelsKafka) ReadKafkaConsumerGroupMessage() {
 				return
 			}
 
-			consumer.ready = make(chan bool)
+			consumer.Ready = make(chan bool)
 		}
 	}()
 
-	<-consumer.ready // Await till the consumer has been set up
+	<-consumer.Ready // Await till the consumer has been set up
 	tools.Stdout("Sarama consumer up and running!...")
 
 	sigusr1 := make(chan os.Signal, 1)
@@ -142,64 +142,4 @@ func toggleConsumptionFlow(client sarama.ConsumerGroup, isPaused *bool) {
 	}
 
 	*isPaused = !*isPaused
-}
-
-// Consumer represents a Sarama consumer group consumer
-type Consumer struct {
-	ready chan bool
-}
-
-// Setup is run at the beginning of a new session, before ConsumeClaim
-func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
-	// Mark the consumer as ready
-	close(consumer.ready)
-	return nil
-}
-
-// Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
-func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
-	return nil
-}
-
-// ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
-// Once the Messages() channel is closed, the Handler must finish its processing
-// loop and exit.
-func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	// NOTE:
-	// Do not move the code below to a goroutine.
-	// The `ConsumeClaim` itself is called within a goroutine, see:
-	// https://github.com/IBM/sarama/blob/main/consumer_group.go#L27-L29
-	for {
-		select {
-		case message, ok := <-claim.Messages():
-			if !ok {
-				tools.Stdout("message channel was closed")
-				return nil
-			}
-			fmt.Printf("Topic:%s Partition:%d Offset:%d Key:%v Value:%v\n", message.Topic, message.Partition, message.Offset, message.Key, string(message.Value))
-
-			err := handleMessage(message.Value)
-
-			if err == nil {
-				session.MarkMessage(message, "")
-			}
-
-		// Should return when `session.Context()` is done.
-		// If not, will raise `ErrRebalanceInProgress` or `read tcp <ip>:<port>: i/o timeout` when kafka rebalance. see:
-		// https://github.com/IBM/sarama/issues/1192
-		case <-session.Context().Done():
-			return nil
-		}
-	}
-}
-
-func handleMessage(d []byte) error {
-	data := map[string]any{}
-	err := json.Unmarshal(d, &data)
-
-	if err != nil {
-		return err
-	}
-
-	return err
 }

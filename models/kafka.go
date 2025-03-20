@@ -25,7 +25,7 @@ func (m *ModelsKafka) SendKafkaProducerMessage(broker, topic, data string) {
 	producer := tools.GetKafkaProducerClient(broker)
 
 	if producer == nil {
-		log.Fatalf("kafka producer is not connected")
+		fmt.Println("kafka producer is not connected")
 		return
 	}
 
@@ -43,7 +43,7 @@ func (m *ModelsKafka) HandlerKafkaConsumerMessage(broker, topic string) {
 	partitionList, err := consumer.Partitions(topic)
 
 	if err != nil {
-		log.Panicf("error get partition: %v", err)
+		fmt.Printf("error get partition: %v\n", err)
 		return
 	}
 

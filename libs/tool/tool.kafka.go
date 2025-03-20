@@ -2,7 +2,6 @@ package tool
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"go-schedule/config"
@@ -83,11 +82,11 @@ func (k *KafkaConsumer) Close() {
 }
 
 // kafka consumer group
-type KafkaConsumerCroup struct {
+type KafkaConsumerGroup struct {
 	Client map[string]sarama.ConsumerGroup
 }
 
-func NewKafkaConsumerGroup(data map[string]string) *KafkaConsumerCroup {
+func NewKafkaConsumerGroup(data map[string]string) *KafkaConsumerGroup {
 	client := make(map[string]sarama.ConsumerGroup, 0)
 
 	for k, v := range data {
@@ -96,10 +95,11 @@ func NewKafkaConsumerGroup(data map[string]string) *KafkaConsumerCroup {
 		client[k] = createKafkaConsumerGroupClient(addr, option)
 	}
 
-	return &KafkaConsumerCroup{
+	return &KafkaConsumerGroup{
 		Client: client,
 	}
 }
+
 func createKafkaConsumerGroupClient(kfkConf []string, options map[string]string) sarama.ConsumerGroup {
 	config := sarama.NewConfig()
 
@@ -137,41 +137,41 @@ func createKafkaConsumerGroupClient(kfkConf []string, options map[string]string)
 	return consumer
 }
 
-func (k *KafkaConsumerCroup) Close() {
+func (k *KafkaConsumerGroup) Close() {
 	for _, v := range k.Client {
 		v.Close()
 	}
 }
 
 // Consumer represents a Sarama consumer group consumer
-type KafkaConsumerGroup struct {
+type KafkaConsumerGroupConsumer struct {
 	Ready    chan bool
 	Callback func([]byte) error
 }
 
-func NewKafkaConsumerGroupConsumer(callback func([]byte) error) *KafkaConsumerGroup {
-	return &KafkaConsumerGroup{
+func NewKafkaConsumerGroupConsumer(callback func([]byte) error) *KafkaConsumerGroupConsumer {
+	return &KafkaConsumerGroupConsumer{
 		Ready:    make(chan bool),
 		Callback: callback,
 	}
 }
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
-func (c *KafkaConsumerGroup) Setup(sarama.ConsumerGroupSession) error {
+func (c *KafkaConsumerGroupConsumer) Setup(sarama.ConsumerGroupSession) error {
 	// Mark the consumer as ready
 	close(c.Ready)
 	return nil
 }
 
 // Cleanup is run at the end of a session, once all ConsumeClaim goroutines have exited
-func (c *KafkaConsumerGroup) Cleanup(sarama.ConsumerGroupSession) error {
+func (c *KafkaConsumerGroupConsumer) Cleanup(sarama.ConsumerGroupSession) error {
 	return nil
 }
 
 // ConsumeClaim must start a consumer loop of ConsumerGroupClaim's Messages().
 // Once the Messages() channel is closed, the Handler must finish its processing
 // loop and exit.
-func (c *KafkaConsumerGroup) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (c *KafkaConsumerGroupConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	// NOTE:
 	// Do not move the code below to a goroutine.
 	// The `ConsumeClaim` itself is called within a goroutine, see:
@@ -180,7 +180,7 @@ func (c *KafkaConsumerGroup) ConsumeClaim(session sarama.ConsumerGroupSession, c
 		select {
 		case message, ok := <-claim.Messages():
 			if !ok {
-				log.Panicf("message channel was closed")
+				fmt.Println("message channel was closed")
 				return nil
 			}
 			// fmt.Printf("Partition:%d Offset:%d Key:%v Value:%v\n", message.Partition, message.Offset, message.Key, string(message.Value))

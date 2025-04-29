@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -17,45 +16,23 @@ func NewUnits() *Units {
 	return &Units{}
 }
 
-func (u *Units) Contain(arr []string, element string) bool {
-	for _, v := range arr {
-		if v == element {
-			return true
-		}
-	}
-	return false
-}
+// 字符串转换
+// https://github.com/spf13/cast
 
-func (u *Units) MarshalJson(date any) []byte {
+func (u *Units) MarshalJson(date any) string {
 	res, err := json.Marshal(date)
 
 	if err != nil {
-		fmt.Println(err)
+		return ""
 	}
 
-	return res
+	return string(res)
 }
 
 func (u *Units) UnmarshalJson(date string) map[string]any {
-	var res map[string]any
+	res := make(map[string]any, 0)
 
 	_ = json.Unmarshal([]byte(date), &res)
-
-	return res
-}
-
-func (u *Units) IntToString(value int64) string {
-	v := strconv.FormatInt(value, 10)
-
-	return v
-}
-
-func (u *Units) StringToInt(value string) int64 {
-	res, err := strconv.ParseInt(value, 10, 64)
-
-	if err != nil {
-		res = 0
-	}
 
 	return res
 }
@@ -85,64 +62,33 @@ func (u *Units) CheckPassword(password string, min, max int) int {
 }
 
 func (u *Units) HandleEscape(source string) string {
-	var j int = 0
-
 	if len(source) == 0 {
 		return ""
 	}
 
-	tempStr := source[:]
-	desc := make([]byte, len(tempStr)*2)
+	var builder strings.Builder
+	builder.Grow(len(source) * 2)
 
-	for i := 0; i < len(tempStr); i++ {
-		flag := false
-		var escape byte
-
-		switch tempStr[i] {
-		case '\r':
-			flag = true
-			escape = '\r'
-			break
-		case '\n':
-			flag = true
-			escape = '\n'
-			break
-		case '\\':
-			flag = true
-			escape = '\\'
-			break
-		case '\'':
-			flag = true
-			escape = '\''
-			break
-		case '"':
-			flag = true
-			escape = '"'
-			break
-		case '\032':
-			flag = true
-			escape = 'Z'
-			break
+	for _, c := range source {
+		switch c {
+		case '\r', '\n', '\\', '\'', '"', '\032', '\x00', '\b', '\t':
+			builder.WriteByte('\\')
+			if c == '\032' {
+				builder.WriteByte('Z') // 处理 MySQL 的 Ctrl+Z
+			} else {
+				builder.WriteByte(byte(c))
+			}
 		default:
-		}
-
-		if flag {
-			desc[j] = '\\'
-			desc[j+1] = escape
-			j = j + 2
-		} else {
-			desc[j] = tempStr[i]
-			j = j + 1
+			builder.WriteByte(byte(c))
 		}
 	}
-
-	return string(desc[0:j])
+	return builder.String()
 }
 
 func (u *Units) GenerateRandomNumber(start, end, count int) ([]int, error) {
 	var result []int
 
-	for i := 0; i < count; i++ {
+	for range count {
 		rangeBig := big.NewInt(int64(end - start + 1))
 		n, err := rand.Int(rand.Reader, rangeBig)
 
@@ -157,6 +103,7 @@ func (u *Units) GenerateRandomNumber(start, end, count int) ([]int, error) {
 
 	return result, nil
 }
+
 func (u *Units) RemoveDuplicateElement(strs []string) []string {
 	result := make([]string, 0, len(strs))
 	temp := map[string]struct{}{}
@@ -181,17 +128,6 @@ func (u *Units) IsSlice(v any) bool {
 	return false
 }
 
-func (u *Units) StringToArray(data string) []string {
-	result := []string{}
-
-	if len(data) > 0 {
-		result = strings.Split(data, ",")
-	}
-
-	return result
-}
-
-func (u *Units) FloatToString(data float64) string {
-	result := strconv.FormatFloat(data, 'f', 2, 64)
-	return result
+func (u *Units) ArrayIntToString(array []int, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(array), " ", delim, -1), "[]")
 }

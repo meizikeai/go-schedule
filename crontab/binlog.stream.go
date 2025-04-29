@@ -3,6 +3,7 @@ package crontab
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"go-schedule/config"
@@ -86,7 +87,7 @@ func handleBinlogEvent(event *replication.BinlogEvent) {
 
 	schemaTable := fmt.Sprintf("%s.%s", schemaName, tableName)
 
-	if units.Contain(binlogEnableTable, schemaTable) != true {
+	if slices.Contains(binlogEnableTable, schemaTable) != true {
 		// fmt.Printf("Unauthorized database for %s %s\n", schemaName, tableName)
 		return
 	}

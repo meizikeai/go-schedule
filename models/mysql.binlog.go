@@ -7,6 +7,7 @@ import (
 	"go-schedule/libs/types"
 
 	"github.com/go-mysql-org/go-mysql/schema"
+	"github.com/spf13/cast"
 )
 
 var (
@@ -97,7 +98,7 @@ func (m *BinlogMySQL) GetBinlogFieldAndValeue(tableSchema *schema.Table, row []a
 			result[col.Name] = fmt.Sprintf("%v", value)
 		case schema.TYPE_FLOAT: // float, double
 			if v, ok := value.(float64); ok {
-				result[col.Name] = units.FloatToString(v)
+				result[col.Name] = cast.ToString(v)
 			} else {
 				result[col.Name] = fmt.Sprintf("%v", value)
 			}

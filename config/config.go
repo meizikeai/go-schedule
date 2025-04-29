@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"slices"
 )
 
 var env = []string{
@@ -14,12 +15,7 @@ func GetMode() string {
 	pass := false
 	mode := os.Getenv("GO_MODE")
 
-	for _, v := range env {
-		if v == mode {
-			pass = true
-			break
-		}
-	}
+	pass = slices.Contains(env, mode)
 
 	if pass == false {
 		mode = "test"

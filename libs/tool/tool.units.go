@@ -61,30 +61,6 @@ func (u *Units) CheckPassword(password string, min, max int) int {
 	return level
 }
 
-func (u *Units) HandleEscape(source string) string {
-	if len(source) == 0 {
-		return ""
-	}
-
-	var builder strings.Builder
-	builder.Grow(len(source) * 2)
-
-	for _, c := range source {
-		switch c {
-		case '\r', '\n', '\\', '\'', '"', '\032', '\x00', '\b', '\t':
-			builder.WriteByte('\\')
-			if c == '\032' {
-				builder.WriteByte('Z') // 处理 MySQL 的 Ctrl+Z
-			} else {
-				builder.WriteByte(byte(c))
-			}
-		default:
-			builder.WriteByte(byte(c))
-		}
-	}
-	return builder.String()
-}
-
 func (u *Units) GenerateRandomNumber(start, end, count int) ([]int, error) {
 	var result []int
 

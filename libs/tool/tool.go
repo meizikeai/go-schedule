@@ -189,7 +189,8 @@ func (t *Tools) HandleZookeeperClient() {
 	zookeeper := NewZookeeper(servers)
 
 	for key, val := range config.ZookeeperConfig {
-		if key == "mysql" {
+		switch key {
+		case "mysql":
 			config := make(map[string]types.ConfMySQL, 0)
 
 			for k, v := range val {
@@ -224,7 +225,7 @@ func (t *Tools) HandleZookeeperClient() {
 			}
 
 			zookeeperMySQL = config
-		} else if key == "redis" {
+		case "redis":
 			config := make(map[string]types.ConfRedis, 0)
 
 			for k, v := range val {
@@ -236,7 +237,7 @@ func (t *Tools) HandleZookeeperClient() {
 			}
 
 			zookeeperRedis = config
-		} else if key == "api" {
+		case "api":
 			config := make(map[string][]string, 0)
 
 			for k, v := range val {
@@ -245,7 +246,7 @@ func (t *Tools) HandleZookeeperClient() {
 			}
 
 			zookeeperApi = config
-		} else if key == "config" {
+		case "config":
 			config := make(map[string]string, 0)
 
 			for k, v := range val {

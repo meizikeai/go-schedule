@@ -18,7 +18,7 @@ func NewTasks() *Tasks {
 var (
 	tools = tool.NewTools()
 	units = tool.NewUnits()
-	mysql = models.NewModelsMySQL()
+	// mysql = models.NewModelsMySQL()
 	redis = models.NewModelsRedis()
 )
 

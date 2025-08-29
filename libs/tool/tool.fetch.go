@@ -40,10 +40,8 @@ func (f *Fetch) GET(reqUrl string, reqParams, headers map[string]string) ([]byte
 
 	req.Header.Set("Content-Type", "application/json")
 
-	if headers != nil {
-		for key, val := range headers {
-			req.Header.Add(key, val)
-		}
+	for key, val := range headers {
+		req.Header.Add(key, val)
 	}
 
 	pool := &http.Client{
@@ -92,10 +90,8 @@ func (f *Fetch) POST(reqUrl string, body any, params, headers map[string]string)
 		req.URL.RawQuery = q.Encode()
 	}
 
-	if headers != nil {
-		for key, val := range headers {
-			req.Header.Add(key, val)
-		}
+	for key, val := range headers {
+		req.Header.Add(key, val)
 	}
 
 	pool := &http.Client{

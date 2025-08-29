@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"go-schedule/config"
-	"go-schedule/libs/tool"
 	"go-schedule/libs/types"
 	"go-schedule/models"
 
@@ -19,7 +18,7 @@ var (
 	means        = models.NewBinlogMySQL()
 	binlogConfig = config.GetBinlogConfig()
 
-	diary             = tool.NewCustomLogger("crontab", false)
+	// diary             = tool.NewCustomLogger("crontab", false)
 	binlogEnableTable = config.GetBinlogEnableTable("default")
 )
 

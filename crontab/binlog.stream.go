@@ -8,14 +8,14 @@ import (
 
 	"go-schedule/config"
 	"go-schedule/libs/types"
-	"go-schedule/models"
+	"go-schedule/repository"
 
 	binlog "github.com/go-mysql-org/go-mysql/mysql"
 	"github.com/go-mysql-org/go-mysql/replication"
 )
 
 var (
-	means        = models.NewBinlogMySQL()
+	means        = repository.NewBinlogMySQL()
 	binlogConfig = config.GetBinlogConfig()
 
 	// diary             = tool.NewCustomLogger("crontab", false)

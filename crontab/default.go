@@ -6,7 +6,7 @@ import (
 
 	"go-schedule/config"
 	"go-schedule/libs/tool"
-	"go-schedule/models"
+	"go-schedule/repository"
 )
 
 type Tasks struct{}
@@ -18,8 +18,8 @@ func NewTasks() *Tasks {
 var (
 	tools = tool.NewTools()
 	units = tool.NewUnits()
-	// mysql = models.NewModelsMySQL()
-	redis = models.NewModelsRedis()
+	// mysql = repository.NewModelsMySQL()
+	redis = repository.NewModelsRedis()
 )
 
 func (t *Tasks) HandleRun() {

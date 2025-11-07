@@ -85,7 +85,7 @@ func (c *CreateLog) HandleLogger(app string) {
 	debFile := filepath.Join("/data/logs/", app, "/debug.log")
 	traFile := filepath.Join("/data/logs/", app, "/trace.log")
 
-	if GetGoEnv() == "debug" {
+	if os.Getenv("GO_ENV") == "debug" {
 		pwd, _ := os.Getwd()
 
 		errFile = filepath.Join(pwd, "../logs/error.log")

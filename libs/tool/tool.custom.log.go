@@ -9,41 +9,23 @@ import (
 	"time"
 )
 
-func NewCustomLogger(name string, fixed bool) *slog.Logger {
-	path := fmt.Sprintf("/data/logs/%s/", GetAppName())
+func NewCustomLogger(name string) (*slog.Logger, error) {
+	basePath := getLogPath(name)
 
-	if GetGoEnv() == "debug" {
-		pwd, _ := os.Getwd()
-		path = filepath.Join(pwd, "../logs/")
-	}
-
-	if err := os.MkdirAll(path, 0755); err != nil {
-		return nil
-	}
-
-	trace := ""
-
-	if fixed == true {
-		trace = time.Now().Format(".2006.01.02.150405")
-	}
-
-	basePath := filepath.Join(path, fmt.Sprintf("%s.log%s", name, trace))
 	file, err := os.OpenFile(basePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("failed to open log file: %w", err)
 	}
 
-	h := slog.NewJSONHandler(file, &slog.HandlerOptions{
+	handler := slog.NewJSONHandler(file, &slog.HandlerOptions{
 		AddSource: true,
 		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.TimeKey {
+			switch a.Key {
+			case slog.TimeKey:
 				a.Value = slog.StringValue(time.Now().Format("2006-01-02 15:04:05"))
-			}
-			if a.Key == slog.LevelKey {
+			case slog.LevelKey:
 				return slog.Attr{}
-			}
-			if a.Key == slog.SourceKey {
+			case slog.SourceKey:
 				if src, ok := a.Value.Any().(*slog.Source); ok {
 					a.Value = slog.StringValue(filepath.Base(src.File) + ":" + strconv.Itoa(src.Line))
 				}
@@ -52,5 +34,26 @@ func NewCustomLogger(name string, fixed bool) *slog.Logger {
 		},
 	})
 
-	return slog.New(h)
+	return slog.New(handler), nil
+}
+
+func getLogPath(name string) string {
+	appName := os.Getenv("GO_APP")
+	if appName == "" {
+		appName = "custom-log"
+	}
+
+	var logDir string
+	if os.Getenv("GO_ENV") == "debug" {
+		pwd, _ := os.Getwd()
+		logDir = filepath.Join(pwd, "../logs")
+	} else {
+		logDir = filepath.Join("/data/logs", appName)
+	}
+
+	_ = os.MkdirAll(logDir, 0755)
+
+	timestamp := "." + time.Now().Format("2006.01.02.150405")
+
+	return filepath.Join(logDir, fmt.Sprintf("%s.log%s", name, timestamp))
 }

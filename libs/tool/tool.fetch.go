@@ -4,116 +4,84 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
 )
 
-type Fetch struct{}
+type Fetch struct {
+	client *http.Client
+}
 
 func NewFetch() *Fetch {
-	return &Fetch{}
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.DialContext = (&net.Dialer{
+		Timeout:   3 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext
+	transport.TLSHandshakeTimeout = 3 * time.Second
+
+	return &Fetch{
+		client: &http.Client{
+			Timeout:   4 * time.Second,
+			Transport: transport,
+		},
+	}
 }
 
-func (f *Fetch) GET(reqUrl string, reqParams, headers map[string]string) ([]byte, error) {
-	result := []byte{}
-
-	params := url.Values{}
-	urlPath, err := url.Parse(reqUrl)
-
-	if err != nil {
-		return result, err
-	}
-
-	for key, val := range reqParams {
-		params.Set(key, val)
-	}
-
-	urlPath.RawQuery = params.Encode()
-	url := urlPath.String()
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-
-	if err != nil {
-		return result, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	for key, val := range headers {
-		req.Header.Add(key, val)
-	}
-
-	pool := &http.Client{
-		Timeout: 4000 * time.Millisecond,
-	}
-
-	res, err := pool.Do(req)
-
-	if err != nil {
-		return result, err
-	}
-
-	result, err = io.ReadAll(res.Body)
-
-	if err != nil {
-		return result, err
-	}
-
-	// record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(result))
-	// fmt.Println(record)
-
-	defer res.Body.Close()
-
-	return result, nil
+func (f *Fetch) GET(uri string, params map[string]string) ([]byte, error) {
+	return f.doRequest(http.MethodGet, uri, nil, params, nil)
 }
 
-func (f *Fetch) POST(reqUrl string, body any, params, headers map[string]string) ([]byte, error) {
-	result := []byte{}
+func (f *Fetch) POST(uri string, body any, params map[string]string) ([]byte, error) {
+	var buffer io.Reader
 
-	data, _ := json.Marshal(body)
-	req, err := http.NewRequest(http.MethodPost, reqUrl, bytes.NewBuffer(data))
-
-	if err != nil {
-		return result, err
+	if body != nil {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		buffer = bytes.NewReader(data)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	return f.doRequest(http.MethodPost, uri, buffer, params, nil)
+}
 
-	q := req.URL.Query()
+func (f *Fetch) doRequest(method, uri string, body io.Reader, params, headers map[string]string) ([]byte, error) {
+	u, err := url.Parse(uri)
+	if err != nil {
+		return nil, err
+	}
 
 	if params != nil {
-		for key, val := range params {
-			q.Add(key, val)
+		q := u.Query()
+		for k, v := range params {
+			q.Set(k, v)
 		}
-
-		req.URL.RawQuery = q.Encode()
+		u.RawQuery = q.Encode()
 	}
 
-	for key, val := range headers {
-		req.Header.Add(key, val)
-	}
-
-	pool := &http.Client{
-		Timeout: 4000 * time.Millisecond,
-	}
-
-	res, err := pool.Do(req)
-
+	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
-	result, err = io.ReadAll(res.Body)
+	req.Header.Set("Content-Type", "application/json")
 
+	for k, v := range headers {
+		req.Header.Set(k, v)
+	}
+
+	res, err := f.client.Do(req)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
-
-	// record := fmt.Sprintf("url:%s, body:%s, result:%s", req.URL.String(), string(data), string(result))
-	// fmt.Println(record)
 
 	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	// record := fmt.Sprintf("url:%s, result:%s", req.URL.String(), string(data))
+	// fmt.Println("->", record, err)
 
-	return result, nil
+	return data, err
 }

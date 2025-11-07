@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"math/big"
-	"os"
 	"time"
 
 	"go-schedule/config"
@@ -57,14 +56,6 @@ func (t *Tools) GetRandmod(length int) int64 {
 
 func (t *Tools) GetTime() string {
 	return time.Now().Format("2006-01-02 15:04:05")
-}
-
-func GetAppName() string {
-	return os.Getenv("CS_APP")
-}
-
-func GetGoEnv() string {
-	return os.Getenv("GO_ENV")
 }
 
 // crontab

@@ -24,12 +24,12 @@ var (
 
 func (t *Tasks) HandleRun() {
 	pid := os.Getpid()
-	tools.Stdout("The current environment is " + config.GetMode())
-	tools.Stdout(fmt.Sprintf("The process id of the service is %v", pid))
+	tools.Stdout("Starting application in the " + config.GetMode() + " environment")
+	tools.Stdout(fmt.Sprintf("Service process ID %v", pid))
 }
 
 func (t *Tasks) HandleCheck() func() {
 	return func() {
-		tools.Stdout("Scheduled task is running...")
+		tools.Stdout("Scheduled tasks are running...")
 	}
 }

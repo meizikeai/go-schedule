@@ -87,7 +87,7 @@ func (t *Tools) HandleMySQLClient() {
 
 	dbMySQLCache = result.Client
 
-	t.Stdout("MySQL is Connected")
+	t.Stdout("MySQL connected")
 }
 
 func (t *Tools) CloseMySQL() {
@@ -97,7 +97,7 @@ func (t *Tools) CloseMySQL() {
 		}
 	}
 
-	t.Stdout("MySQL is Close")
+	t.Stdout("MySQL connection closed")
 }
 
 // mysql binlog - replication
@@ -111,7 +111,7 @@ func (t *Tools) HandleReplicationMySQLClient() {
 
 	dbMySQLReplicationCache = result.Client
 
-	t.Stdout("MySQL Binlog Replication is Connected")
+	t.Stdout("MySQL Binlog Replication connected")
 }
 
 // mysql binlog - canal
@@ -125,7 +125,7 @@ func (t *Tools) HandleCanalMySQLClient() {
 
 	dbMySQLCanalCache = result.Client
 
-	t.Stdout("MySQL Binlog Canal is Connected")
+	t.Stdout("MySQL Binlog Canal connected")
 }
 
 // redis
@@ -142,7 +142,7 @@ func (t *Tools) HandleRedisClient() {
 
 	dbRedisCache = result.Client
 
-	t.Stdout("Redis is Connected")
+	t.Stdout("Redis connected")
 }
 
 func (t *Tools) CloseRedis() {
@@ -152,7 +152,7 @@ func (t *Tools) CloseRedis() {
 		}
 	}
 
-	t.Stdout("Redis is Close")
+	t.Stdout("Redis connection closed")
 }
 
 // api
@@ -284,7 +284,7 @@ func (t *Tools) HandleElasticSearchClient() {
 
 	esClient = result.Client
 
-	t.Stdout("ElasticSearch is Connected")
+	t.Stdout("ElasticSearch connected")
 }
 
 // kafka
@@ -295,12 +295,12 @@ func (t *Tools) HandleKafkaProducerClient() {
 
 	kafkaProducer = result.Client
 
-	t.Stdout("Kafka Producer is Connected")
+	t.Stdout("Kafka(producer) connected")
 }
 
 func (t *Tools) GetKafkaProducerClient(broker string) sarama.AsyncProducer {
 	if kafkaProducer[broker] == nil {
-		panic("Kafka Producer is not connected")
+		panic("Kafka(producer) connection closed")
 	}
 
 	return kafkaProducer[broker]
@@ -313,12 +313,12 @@ func (t *Tools) HandleKafkaConsumerClient() {
 
 	kafkaConsumer = result.Client
 
-	t.Stdout("Kafka Consumer is Connected")
+	t.Stdout("Kafka(consumer) connected")
 }
 
 func (t *Tools) GetKafkaConsumerClient(broker string) sarama.Consumer {
 	if kafkaConsumer[broker] == nil {
-		panic("Kafka Consumer is not connected")
+		panic("Kafka(consumer) connection closed")
 	}
 
 	return kafkaConsumer[broker]
@@ -331,12 +331,12 @@ func (t *Tools) HandleKafkaConsumerGroupClient() {
 
 	kafkaConsumerGroup = result.Client
 
-	t.Stdout("Kafka Consumer Group is Connected")
+	t.Stdout("Kafka(consumer group) connected")
 }
 
 func (t *Tools) GetKafkaConsumerGroupClient(broker string) sarama.ConsumerGroup {
 	if kafkaConsumerGroup[broker] == nil {
-		panic("Kafka Consumer Group  is not connected")
+		panic("Kafka(consumer group) connection closed")
 	}
 
 	return kafkaConsumerGroup[broker]
@@ -347,21 +347,21 @@ func (t *Tools) CloseKafka() {
 		for _, v := range kafkaProducer {
 			v.Close()
 		}
-		t.Stdout("Kafka Producer is Close")
+		t.Stdout("Kafka(producer) connection closed")
 	}
 
 	if len(kafkaConsumer) > 0 {
 		for _, v := range kafkaConsumer {
 			v.Close()
 		}
-		t.Stdout("Kafka Consumer is Close")
+		t.Stdout("Kafka(consumer) connection closed")
 	}
 
 	if len(kafkaConsumerGroup) > 0 {
 		for _, v := range kafkaConsumerGroup {
 			v.Close()
 		}
-		t.Stdout("Kafka Consumer Group is Close")
+		t.Stdout("Kafka(consumer group) connection closed")
 	}
 }
 
@@ -380,7 +380,7 @@ func (t *Tools) HandleMongoDBClient() {
 
 	dbMongoDBCache = result.Client
 
-	t.Stdout("MongoDB is Connected")
+	t.Stdout("MongoDB connected")
 }
 
 // email
@@ -394,5 +394,5 @@ func (t *Tools) HandleMailClient() {
 
 	emailClient = result.Client
 
-	t.Stdout("Mail Dialer is Connected")
+	t.Stdout("Mail Dialer connected")
 }

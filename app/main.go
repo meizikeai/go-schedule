@@ -30,12 +30,10 @@ func init() {
 	// tools.HandleRedisClient()
 	// tools.HandleMongodbClient()
 	// tools.HandleMailClient()
-
 	// tools.HandleElasticSearchClient()
 	// tools.HandleKafkaProducerClient()
 	// tools.HandleKafkaConsumerClient()
 	// tools.HandleKafkaConsumerGroupClient()
-
 	daily.HandleLogger("go-schedule")
 }
 
@@ -47,9 +45,7 @@ func main() {
 		// tools.CloseKafka()
 		// tools.CloseElasticSearch()
 		// tools.CloseMail()
-
-		tools.Stdout("The Service is Shutdown")
-
+		tools.Stdout("Service shut down")
 		os.Exit(0)
 	})
 

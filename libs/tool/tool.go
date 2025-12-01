@@ -12,18 +12,15 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/go-mysql-org/go-mysql/canal"
 	"github.com/go-mysql-org/go-mysql/replication"
 	"github.com/go-redis/redis/v8"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/mongo"
-	"gopkg.in/gomail.v2"
 )
 
 var (
 	dbMySQLCache            map[string][]*sql.DB
 	dbMySQLReplicationCache map[string]*replication.BinlogSyncer
-	dbMySQLCanalCache       map[string]*canal.Canal
 	dbRedisCache            map[string][]*redis.Client
 	dbMongoDBCache          map[string]*mongo.Client
 	zookeeperMySQL          map[string]types.ConfMySQL
@@ -34,7 +31,6 @@ var (
 	kafkaProducer           map[string]sarama.AsyncProducer
 	kafkaConsumer           map[string]sarama.Consumer
 	kafkaConsumerGroup      map[string]sarama.ConsumerGroup
-	emailClient             map[string]gomail.SendCloser
 )
 
 type Tools struct{}
@@ -107,25 +103,11 @@ func (t *Tools) GetReplicationMySQLClient(key string) *replication.BinlogSyncer 
 
 func (t *Tools) HandleReplicationMySQLClient() {
 	config := config.GetBinlogConfig()
-	result := NewReplicationMySQLClient(config)
+	result := NewReplicationMySQL(config)
 
 	dbMySQLReplicationCache = result.Client
 
 	t.Stdout("MySQL Binlog Replication connected")
-}
-
-// mysql binlog - canal
-func (t *Tools) GetCanalMySQLClient(key string) *canal.Canal {
-	return dbMySQLCanalCache[key]
-}
-
-func (t *Tools) HandleCanalMySQLClient() {
-	config := config.GetCanalConfig()
-	result := NewCanalMySQLClient(config)
-
-	dbMySQLCanalCache = result.Client
-
-	t.Stdout("MySQL Binlog Canal connected")
 }
 
 // redis
@@ -381,18 +363,4 @@ func (t *Tools) HandleMongoDBClient() {
 	dbMongoDBCache = result.Client
 
 	t.Stdout("MongoDB connected")
-}
-
-// email
-func (t *Tools) GetMailClient(key string) gomail.SendCloser {
-	return emailClient[key]
-}
-
-func (t *Tools) HandleMailClient() {
-	config := config.GetMailConfig()
-	result := NewEmail(config)
-
-	emailClient = result.Client
-
-	t.Stdout("Mail Dialer connected")
 }

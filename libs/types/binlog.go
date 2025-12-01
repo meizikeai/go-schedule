@@ -1,13 +1,13 @@
 package types
 
 type ConfBinlog struct {
-	ServerId uint32 `json:"serverId"`
+	ServerID uint32 `json:"serverId"`
 	Flavor   string `json:"flavor"`
 	Name     string `json:"name"`
 	Pos      uint32 `json:"pos"`
 	Host     string `json:"host"`
 	Port     uint16 `json:"port"`
-	Username string `json:"username"`
+	User     string `json:"user"`
 	Password string `json:"password"`
 }
 

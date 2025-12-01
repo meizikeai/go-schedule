@@ -1,4 +1,2 @@
-.vscode
-go-schedule
-logs
-vendor
+/logs
+/vendor

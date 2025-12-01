@@ -1,0 +1,28 @@
+app:
+  name: go-schedule
+  mode: release     # test 或 release
+
+mysql:
+  default:
+    master:
+      - "database:password@tcp(127.0.0.1:3306)/tablename"
+    slave:
+      - "database:password@tcp(127.0.0.1:3306)/tablename"
+    max_idle_conns: 100
+    max_open_conns: 200
+    conn_max_lifetime: 10
+
+redis:
+  default:
+    addrs:
+      - "127.0.0.1:6379"
+    password: ""
+    db: 0
+    pool_size: 20
+
+kafka:
+  default: 
+    brokers: 
+      - "127.0.0.1:9092"
+    topic: "topic-test"
+    group_id: "group-test"

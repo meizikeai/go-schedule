@@ -10,9 +10,10 @@ import (
 
 type Config struct {
 	App   App                        `mapstructure:"app"`
+	Host  map[string]string          `mapstructure:"host"`
+	Kafka map[string]KafkaInstance   `mapstructure:"kafka"`
 	MySQL map[string][]MySQLInstance `mapstructure:"mysql"`
 	Redis map[string][]RedisInstance `mapstructure:"redis"`
-	Kafka map[string]KafkaInstance   `mapstructure:"kafka"`
 }
 
 type App struct {

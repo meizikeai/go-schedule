@@ -7,18 +7,33 @@ import (
 	"go-schedule/internal/model"
 	"go-schedule/internal/pkg/database/cache"
 	"go-schedule/internal/pkg/database/mysql"
+	"go-schedule/internal/pkg/fetch"
 
 	"go.uber.org/zap"
 )
 
 type repository struct {
-	log   *zap.Logger
-	db    *mysql.Clients
+	api   map[string]string
 	cache *cache.Clients
+	db    *mysql.Clients
+	fetch *fetch.Fetch
+	log   *zap.Logger
 }
 
-func NewRepository(log *zap.Logger, db *mysql.Clients, cache *cache.Clients) Repository {
-	return &repository{log, db, cache}
+func NewRepository(
+	api map[string]string,
+	cache *cache.Clients,
+	db *mysql.Clients,
+	fetch *fetch.Fetch,
+	log *zap.Logger,
+) Repository {
+	return &repository{
+		api,
+		cache,
+		db,
+		fetch,
+		log,
+	}
 }
 
 type Repository interface {

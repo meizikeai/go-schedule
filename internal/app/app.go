@@ -13,17 +13,18 @@ import (
 	"go-schedule/internal/pkg/database/cache"
 	"go-schedule/internal/pkg/database/kafka"
 	"go-schedule/internal/pkg/database/mysql"
+	"go-schedule/internal/pkg/fetch"
 	"go-schedule/internal/pkg/log"
 
 	"go.uber.org/zap"
 )
 
 type App struct {
-	Log        *zap.Logger
 	cfg        *config.Config
 	Cache      Storage
 	DB         Storage
 	Kafka      Storage
+	Log        *zap.Logger
 	Repository repository.Repository
 	Tasks      task.Tasks
 }
@@ -36,17 +37,18 @@ func NewApp() *App {
 	cfg := config.Load()
 
 	cache := cache.NewClient(&cfg.Redis)
-	data := mysql.NewClient(&cfg.MySQL)
+	db := mysql.NewClient(&cfg.MySQL)
 	kafka := kafka.NewClient(&cfg.Kafka)
+	fetch := fetch.NewFetch()
 	record := log.Load(cfg.App.Name, cfg.App.Mode)
 
 	app := new(App)
 
 	app.cfg = cfg
 	app.Log = record
-	app.cacheClient(data, cache, kafka)
+	app.cacheClient(db, cache, kafka)
 
-	app.Repository = repository.NewRepository(record, data, cache)
+	app.Repository = repository.NewRepository(cfg.Host, cache, db, fetch, record)
 	app.Tasks = task.NewTasks(record, app.Repository)
 
 	return app

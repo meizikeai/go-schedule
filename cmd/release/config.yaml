@@ -2,6 +2,9 @@ app:
   name: go-schedule
   mode: release     # test 或 release
 
+host:
+  test: "127.0.0.1:3000"
+
 mysql:
   default:
     master:

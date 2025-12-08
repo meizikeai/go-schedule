@@ -20,7 +20,7 @@ import (
 )
 
 type App struct {
-	cfg        *config.Config
+	CFG        *config.Config
 	Cache      Storage
 	DB         Storage
 	Kafka      Storage
@@ -44,7 +44,7 @@ func NewApp() *App {
 
 	app := new(App)
 
-	app.cfg = cfg
+	app.CFG = cfg
 	app.Log = record
 	app.cacheClient(db, cache, kafka)
 
@@ -60,11 +60,11 @@ func (a *App) cacheClient(db, cache, kafka Storage) {
 	a.Kafka = kafka
 }
 
-func (a *App) Run() {
-	a.Stdout("Application initialization started in " + a.cfg.App.Mode + " environment")
+func (a *App) Run(ctx context.Context) {
+	a.Stdout("Application initialization started in " + a.CFG.App.Mode + " environment")
 	a.Stdout(fmt.Sprintf("Application started successfully and running on %v", os.Getpid()))
 
-	a.Tasks.TaskRuning()
+	a.Tasks.TaskRuning(ctx)
 	a.Tasks.TaskWaiting()
 }
 
@@ -108,7 +108,7 @@ func (a *App) Shutdown(ctx context.Context) error {
 }
 
 func (a *App) Stdout(format string, v ...any) {
-	log := fmt.Sprintf("%s %s %s \n", time.Now().Format(time.DateTime), fmt.Sprintf("[%s]", a.cfg.App.Name), format)
+	log := fmt.Sprintf("%s %s %s \n", time.Now().Format(time.DateTime), fmt.Sprintf("[%s]", a.CFG.App.Name), format)
 
 	if _, err := fmt.Fprintf(os.Stdout, log, v...); err != nil {
 		fmt.Println(log)

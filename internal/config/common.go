@@ -1,4 +1,4 @@
-// internal/config/config.go
+// internal/config/common.go
 package config
 
 import (
@@ -44,9 +44,12 @@ type KafkaInstance struct {
 
 func Load() *Config {
 	var result *Config
+	var env = os.Getenv("GO_ENV")
+	var path = "."
 
-	path := "."
-	if os.Getenv("GO_ENV") == "debug" {
+	if env == "release" {
+		path = path + "/release"
+	} else {
 		path = path + "/test"
 	}
 

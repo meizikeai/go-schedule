@@ -13,7 +13,7 @@ import (
 )
 
 type repository struct {
-	api   map[string]string
+	host  map[string]string
 	cache *cache.Clients
 	db    *mysql.Clients
 	fetch *fetch.Fetch
@@ -21,14 +21,14 @@ type repository struct {
 }
 
 func NewRepository(
-	api map[string]string,
+	host map[string]string,
 	cache *cache.Clients,
 	db *mysql.Clients,
 	fetch *fetch.Fetch,
 	log *zap.Logger,
 ) Repository {
 	return &repository{
-		api,
+		host,
 		cache,
 		db,
 		fetch,

@@ -14,7 +14,7 @@ import (
 func main() {
 	app := app.NewApp()
 
-	app.Run()
+	app.Run(context.Background())
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

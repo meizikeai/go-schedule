@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
 	"go-schedule/internal/config"
@@ -16,25 +17,28 @@ import (
 
 type Clients struct {
 	clients map[string][]*sql.DB
-	rand    *rand.Rand
+	mu      sync.RWMutex
 }
 
 func NewClient(cfg *map[string][]config.MySQLInstance) *Clients {
 	c := &Clients{
 		clients: make(map[string][]*sql.DB),
-		rand:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
 	for key, value := range *cfg {
 		for _, v := range value {
 			for _, dsn := range v.Master {
 				db := createClient(dsn, &v)
-				c.clients[key] = append(c.clients[key], db)
+				if db != nil {
+					c.clients[key] = append(c.clients[key], db)
+				}
 			}
 			for _, dsn := range v.Slave {
 				db := createClient(dsn, &v)
-				slaveKey := fmt.Sprintf("%s.slave", key)
-				c.clients[slaveKey] = append(c.clients[slaveKey], db)
+				if db != nil {
+					slaveKey := fmt.Sprintf("%s.slave", key)
+					c.clients[slaveKey] = append(c.clients[slaveKey], db)
+				}
 			}
 		}
 	}
@@ -47,6 +51,7 @@ func createClient(dsn string, option *config.MySQLInstance) *sql.DB {
 	if err != nil {
 		panic(err)
 	}
+	cfg.InterpolateParams = true
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
@@ -72,14 +77,17 @@ func setConnPool(db *sql.DB, cfg *config.MySQLInstance) {
 }
 
 func (c *Clients) Client(key string) *sql.DB {
-	if clients := c.clients[key]; len(clients) > 0 {
-		return clients[c.rand.Intn(len(clients))]
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if clients, ok := c.clients[key]; ok && len(clients) > 0 {
+		return clients[rand.Intn(len(clients))]
 	}
 
 	if strings.HasSuffix(key, ".slave") {
 		masterKey := key[:len(key)-6]
-		if clients := c.clients[masterKey]; len(clients) > 0 {
-			return clients[c.rand.Intn(len(clients))]
+		if clients, ok := c.clients[masterKey]; ok && len(clients) > 0 {
+			return clients[rand.Intn(len(clients))]
 		}
 	}
 
@@ -87,6 +95,9 @@ func (c *Clients) Client(key string) *sql.DB {
 }
 
 func (c *Clients) Close() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	for _, value := range c.clients {
 		for _, v := range value {
 			v.Close()

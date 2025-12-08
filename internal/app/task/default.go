@@ -11,8 +11,8 @@ import (
 )
 
 type Tasks interface {
-	TaskRuning()
-	TaskStopped(ctx context.Context)
+	TaskRuning(context.Context)
+	TaskStopped(context.Context)
 	TaskWaiting()
 }
 
@@ -32,14 +32,14 @@ func NewTasks(log *zap.Logger, repo repository.Repository) Tasks {
 	}
 }
 
-func (t *tasks) TaskRuning() {
+func (t *tasks) TaskRuning(ctx context.Context) {
 	// every day 10:00
 	t.cron.AddFunc("0 10 */1 * *", func() {
 		t.log.Info("Cron task always running")
 	})
 
 	// todo
-	// t.cron.AddFunc("@every 10s", func() { ... })
+	// t.cron.AddFunc("@every 10s", func(ctx) { ... })
 
 	t.cron.Start()
 	close(t.started)

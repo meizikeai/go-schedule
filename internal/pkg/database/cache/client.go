@@ -3,7 +3,6 @@ package cache
 
 import (
 	"math/rand"
-	"time"
 
 	"go-schedule/internal/config"
 
@@ -12,13 +11,11 @@ import (
 
 type Clients struct {
 	clients map[string][]*redis.Client
-	rand    *rand.Rand
 }
 
 func NewClient(cfg *map[string][]config.RedisInstance) *Clients {
 	c := &Clients{
 		clients: make(map[string][]*redis.Client),
-		rand:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
 	for key, value := range *cfg {
@@ -47,7 +44,7 @@ func createClient(option *config.RedisInstance) *redis.Client {
 func (c *Clients) Client(key string) *redis.Client {
 	clients := c.clients[key]
 	if len(clients) > 0 {
-		return clients[c.rand.Intn(len(clients))]
+		return clients[rand.Intn(len(clients))]
 	}
 
 	return nil

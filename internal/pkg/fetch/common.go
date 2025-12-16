@@ -18,7 +18,7 @@ type Fetch struct {
 	baseHeaders map[string]string
 }
 
-func NewFetch() *Fetch {
+func NewClient() *Fetch {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.DialContext = (&net.Dialer{
 		Timeout:   5 * time.Second,

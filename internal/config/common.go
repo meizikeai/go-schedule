@@ -4,6 +4,7 @@ package config
 import (
 	"log"
 	"os"
+	"slices"
 
 	"github.com/spf13/viper"
 )
@@ -30,10 +31,11 @@ type MySQLInstance struct {
 }
 
 type RedisInstance struct {
-	Addrs    []string `mapstructure:"addrs"`
-	Password string   `mapstructure:"password"`
-	DB       int      `mapstructure:"db"`
-	PoolSize int      `mapstructure:"pool_size"`
+	Addrs        []string `mapstructure:"addrs"`
+	Password     string   `mapstructure:"password"`
+	DB           int      `mapstructure:"db"`
+	PoolSize     int      `mapstructure:"pool_size"`
+	MinIdleConns int      `mapstructure:"min_idle_conns"`
 }
 
 type KafkaInstance struct {
@@ -44,10 +46,15 @@ type KafkaInstance struct {
 
 func Load() *Config {
 	var result *Config
-	var env = os.Getenv("GO_ENV")
+	var env = []string{"release", "test"}
+	var mode = os.Getenv("GO_ENV")
 	var path = "."
 
-	if env == "release" {
+	if !slices.Contains(env, mode) {
+		mode = "test"
+	}
+
+	if mode == "release" {
 		path = path + "/release"
 	} else {
 		path = path + "/test"
@@ -67,6 +74,8 @@ func Load() *Config {
 	if err := viper.Unmarshal(&result); err != nil {
 		log.Fatalf("Unmarshal config failed: %v", err)
 	}
+
+	result.App.Mode = mode
 
 	return result
 }

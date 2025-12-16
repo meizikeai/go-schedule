@@ -1,3 +1,4 @@
+// internal/model/common.go
 package model
 
 type UsersMobile struct {

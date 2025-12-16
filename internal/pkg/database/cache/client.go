@@ -30,10 +30,11 @@ func NewClient(cfg *map[string][]config.RedisInstance) *Clients {
 
 func createClient(option *config.RedisInstance) *redis.Client {
 	cfg := &redis.Options{
-		Addr:     option.Addrs[0],
-		Password: option.Password,
-		DB:       option.DB,
-		PoolSize: option.PoolSize,
+		Addr:         option.Addrs[0],
+		Password:     option.Password,
+		DB:           option.DB,
+		PoolSize:     option.PoolSize,
+		MinIdleConns: option.MinIdleConns,
 	}
 
 	client := redis.NewClient(cfg)

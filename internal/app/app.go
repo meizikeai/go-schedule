@@ -21,12 +21,12 @@ import (
 
 type App struct {
 	CFG        *config.Config
-	Cache      Storage
-	DB         Storage
-	Kafka      Storage
+	cache      Storage
+	db         Storage
+	kafka      Storage
 	Log        *zap.Logger
 	Repository repository.Repository
-	Tasks      task.Tasks
+	Task       task.Task
 }
 
 type Storage interface {
@@ -39,7 +39,7 @@ func NewApp() *App {
 	cache := cache.NewClient(&cfg.Redis)
 	db := mysql.NewClient(&cfg.MySQL)
 	kafka := kafka.NewClient(&cfg.Kafka)
-	fetch := fetch.NewFetch()
+	fetch := fetch.NewClient()
 	record := log.Load(cfg.App.Name, cfg.App.Mode)
 
 	app := new(App)
@@ -48,52 +48,52 @@ func NewApp() *App {
 	app.Log = record
 	app.cacheClient(db, cache, kafka)
 
-	app.Repository = repository.NewRepository(cfg.Host, cache, db, fetch, record)
-	app.Tasks = task.NewTasks(record, app.Repository)
+	app.Repository = repository.New(cfg.Host, cache, db, fetch, record)
+	app.Task = task.New(record, app.Repository)
 
 	return app
 }
 
 func (a *App) cacheClient(db, cache, kafka Storage) {
-	a.DB = db
-	a.Cache = cache
-	a.Kafka = kafka
+	a.db = db
+	a.cache = cache
+	a.kafka = kafka
 }
 
-func (a *App) Run(ctx context.Context) {
+func (a *App) Run() {
 	a.Stdout("Application initialization started in " + a.CFG.App.Mode + " environment")
 	a.Stdout(fmt.Sprintf("Application started successfully and running on %v", os.Getpid()))
 
-	a.Tasks.TaskRuning(ctx)
-	a.Tasks.TaskWaiting()
+	a.Task.TaskRuning()
+	a.Task.TaskWaiting()
 }
 
 func (a *App) Shutdown(ctx context.Context) error {
 	a.Stdout("Service shutdown initiated")
 
-	if stopper, ok := a.Tasks.(interface{ TaskStopped(context.Context) }); ok {
+	if stopper, ok := a.Task.(interface{ TaskStopped(context.Context) }); ok {
 		stopper.TaskStopped(ctx)
 	}
 
 	var errs []error
 
-	if a.Cache != nil {
+	if a.cache != nil {
 		a.Stdout("Redis connection closed")
-		if err := a.closeStorage(a.Cache, "Redis"); err != nil {
+		if err := a.closeStorage(a.cache, "Redis"); err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	if a.DB != nil {
+	if a.db != nil {
 		a.Stdout("MySQL connection closed")
-		if err := a.closeStorage(a.DB, "MySQL"); err != nil {
+		if err := a.closeStorage(a.db, "MySQL"); err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	if a.Kafka != nil {
+	if a.kafka != nil {
 		a.Stdout("Kafka connection closed")
-		if err := a.closeStorage(a.Kafka, "Kafka"); err != nil {
+		if err := a.closeStorage(a.kafka, "Kafka"); err != nil {
 			errs = append(errs, err)
 		}
 	}

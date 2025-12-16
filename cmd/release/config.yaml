@@ -1,6 +1,5 @@
 app:
   name: go-schedule
-  mode: release     # test 或 release
 
 host:
   test: "127.0.0.1:3000"
@@ -22,10 +21,11 @@ redis:
     password: ""
     db: 0
     pool_size: 20
+    min_idle_conns: 10
 
 kafka:
-  default: 
-    brokers: 
+  default:
+    brokers:
       - "127.0.0.1:9092"
     topic: "topic-test"
     group_id: "group-test"

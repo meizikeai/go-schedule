@@ -10,21 +10,21 @@ import (
 	"go.uber.org/zap"
 )
 
-type Tasks interface {
-	TaskRuning(context.Context)
+type Task interface {
+	TaskRuning()
 	TaskStopped(context.Context)
 	TaskWaiting()
 }
 
-type tasks struct {
+type task struct {
 	log     *zap.Logger
 	repo    repository.Repository
 	cron    *cron.Cron
 	started chan struct{}
 }
 
-func NewTasks(log *zap.Logger, repo repository.Repository) Tasks {
-	return &tasks{
+func New(log *zap.Logger, repo repository.Repository) Task {
+	return &task{
 		log:     log,
 		repo:    repo,
 		cron:    cron.New(),
@@ -32,7 +32,7 @@ func NewTasks(log *zap.Logger, repo repository.Repository) Tasks {
 	}
 }
 
-func (t *tasks) TaskRuning(ctx context.Context) {
+func (t *task) TaskRuning() {
 	// every day 10:00
 	t.cron.AddFunc("0 10 */1 * *", func() {
 		t.log.Info("Cron task always running")
@@ -45,11 +45,11 @@ func (t *tasks) TaskRuning(ctx context.Context) {
 	close(t.started)
 }
 
-func (t *tasks) TaskWaiting() {
+func (t *task) TaskWaiting() {
 	<-t.started
 }
 
-func (t *tasks) TaskStopped(ctx context.Context) {
+func (t *task) TaskStopped(ctx context.Context) {
 	cronCtx := t.cron.Stop()
 
 	select {

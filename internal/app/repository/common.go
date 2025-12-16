@@ -2,8 +2,6 @@
 package repository
 
 import (
-	"context"
-
 	"go-schedule/internal/model"
 	"go-schedule/internal/pkg/database/cache"
 	"go-schedule/internal/pkg/database/mysql"
@@ -20,7 +18,7 @@ type repository struct {
 	log   *zap.Logger
 }
 
-func NewRepository(
+func New(
 	host map[string]string,
 	cache *cache.Clients,
 	db *mysql.Clients,
@@ -37,15 +35,15 @@ func NewRepository(
 }
 
 type Repository interface {
-	FindByID(ctx context.Context, id int64) (model.UsersMobile, error)
+	FindByID(id int64) (model.UsersMobile, error)
 }
 
-func (r *repository) FindByID(ctx context.Context, uid int64) (model.UsersMobile, error) {
+func (r *repository) FindByID(uid int64) (model.UsersMobile, error) {
 	db := r.db.Client("default.slave")
 
 	result := model.UsersMobile{}
 	query := "SELECT `uid`,`mid`,`region`,`encrypt`,`create_time` FROM `users_mobile` WHERE `uid` = ? LIMIT 1"
-	rows, err := db.QueryContext(ctx, query, uid)
+	rows, err := db.Query(query, uid)
 
 	if err != nil {
 		r.log.Error("FindByID", []zap.Field{

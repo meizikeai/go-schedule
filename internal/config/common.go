@@ -11,7 +11,7 @@ import (
 
 type Config struct {
 	App   App                        `mapstructure:"app"`
-	Host  map[string]string          `mapstructure:"host"`
+	LB    map[string]string          `mapstructure:"lb"`
 	Kafka map[string]KafkaInstance   `mapstructure:"kafka"`
 	MySQL map[string][]MySQLInstance `mapstructure:"mysql"`
 	Redis map[string][]RedisInstance `mapstructure:"redis"`
@@ -40,8 +40,6 @@ type RedisInstance struct {
 
 type KafkaInstance struct {
 	Brokers []string `mapstructure:"brokers"`
-	Topic   string   `mapstructure:"topic"`
-	GroupID string   `mapstructure:"group_id"`
 }
 
 func Load() *Config {

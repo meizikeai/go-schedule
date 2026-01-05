@@ -21,13 +21,14 @@ type Fetch struct {
 func NewClient() *Fetch {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.DialContext = (&net.Dialer{
-		Timeout:   5 * time.Second,
+		Timeout:   4 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).DialContext
-	transport.TLSHandshakeTimeout = 5 * time.Second
-	transport.MaxIdleConns = 100
-	transport.MaxIdleConnsPerHost = 20
-	transport.IdleConnTimeout = 90 * time.Second
+	transport.MaxIdleConns = 200
+	transport.MaxIdleConnsPerHost = 10
+	transport.IdleConnTimeout = 20 * time.Second
+	transport.TLSHandshakeTimeout = 4 * time.Second
+	transport.DisableCompression = true
 
 	// OpenTelemetry
 	// tr := otelhttp.NewTransport(transport)
@@ -39,7 +40,6 @@ func NewClient() *Fetch {
 		},
 		baseHeaders: map[string]string{
 			"Content-Type": "application/json",
-			// "User-Agent":   "go-practice/1.0",
 		},
 	}
 }

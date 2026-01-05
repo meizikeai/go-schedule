@@ -48,7 +48,7 @@ func NewApp() *App {
 	app.Log = record
 	app.cacheClient(db, cache, kafka)
 
-	app.Repository = repository.New(cfg.Host, cache, db, fetch, record)
+	app.Repository = repository.New(cache, db, fetch, record, cfg.LB)
 	app.Task = task.New(record, app.Repository)
 
 	return app

@@ -52,6 +52,9 @@ func createClient(dsn string, option *config.MySQLInstance) *sql.DB {
 		panic(err)
 	}
 	cfg.InterpolateParams = true
+	cfg.Timeout = 3 * time.Second
+	cfg.ReadTimeout = 3 * time.Second
+	cfg.WriteTimeout = 3 * time.Second
 
 	db, err := sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {

@@ -1,7 +1,7 @@
 app:
   name: go-schedule
 
-host:
+lb:
   test: "127.0.0.1:3000"
 
 mysql:
@@ -12,7 +12,7 @@ mysql:
       - "database:password@tcp(127.0.0.1:3306)/tablename"
     max_idle_conns: 100
     max_open_conns: 200
-    conn_max_lifetime: 300
+    conn_max_lifetime: 60
 
 redis:
   default:
@@ -20,12 +20,10 @@ redis:
       - "127.0.0.1:6379"
     password: ""
     db: 0
-    pool_size: 20
+    pool_size: 40
     min_idle_conns: 10
 
 kafka:
   default:
     brokers:
       - "127.0.0.1:9092"
-    topic: "topic-test"
-    group_id: "group-test"

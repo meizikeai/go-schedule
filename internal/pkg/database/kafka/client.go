@@ -4,7 +4,6 @@ package kafka
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"go-schedule/internal/config"
@@ -15,15 +14,12 @@ import (
 type Client struct {
 	instances map[string]config.KafkaInstance
 	writers   map[string]*kafka.Writer
-	readers   map[string]*kafka.Reader
-	mu        sync.Mutex
 }
 
 func NewClient(cfgs *map[string]config.KafkaInstance) *Client {
 	c := &Client{
 		instances: make(map[string]config.KafkaInstance),
 		writers:   make(map[string]*kafka.Writer),
-		readers:   make(map[string]*kafka.Reader),
 	}
 
 	for name, cfg := range *cfgs {
@@ -53,131 +49,71 @@ func (c *Client) Produce(ctx context.Context, instance string, topic string, key
 	})
 }
 
-func readerKey(instance, topic, group string) string {
-	if group == "" {
-		return fmt.Sprintf("%s:%s:no-group", instance, topic)
-	}
-	return fmt.Sprintf("%s:%s:group:%s", instance, topic, group)
-}
-
-func (c *Client) getReader(instance, topic, group string) (*kafka.Reader, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	key := readerKey(instance, topic, group)
-	if r, ok := c.readers[key]; ok {
-		return r, nil
-	}
-
+func (c *Client) NewKafkaReader(instance, topic, group string) (*kafka.Reader, error) {
 	cfg, ok := c.instances[instance]
 	if !ok {
 		return nil, fmt.Errorf("kafka instance %s not found", instance)
 	}
 
-	rc := kafka.ReaderConfig{
-		Brokers: cfg.Brokers,
-		Topic:   topic,
-	}
-
-	if group != "" {
-		rc.GroupID = group
-	}
-
-	r := kafka.NewReader(rc)
-	c.readers[key] = r
-	return r, nil
+	return kafka.NewReader(kafka.ReaderConfig{
+		Brokers:        cfg.Brokers,
+		GroupID:        group,
+		Topic:          topic,
+		StartOffset:    kafka.LastOffset,
+		CommitInterval: 0,
+		MinBytes:       10e3, // 10KB
+		MaxBytes:       10e6, // 10MB
+		MaxWait:        500 * time.Millisecond,
+	}), nil
 }
 
-func (c *Client) Consume(ctx context.Context, instance string, topic string, group string) (kafka.Message, error) {
-	_, ok := c.writers[instance]
-	if !ok {
-		return kafka.Message{}, fmt.Errorf("kafka instance %s not found", instance)
-	}
-
-	r, err := c.getReader(instance, topic, group)
+func (c *Client) Consume(ctx context.Context, instance, topic, group string, handler func(kafka.Message) error) {
+	r, err := c.NewKafkaReader(instance, topic, group)
 	if err != nil {
-		return kafka.Message{}, err
+		fmt.Printf("Failed to create reader: %v\n", err)
+		return
 	}
+	defer r.Close()
 
-	return r.FetchMessage(ctx)
-}
+	for {
+		msg, err := r.FetchMessage(ctx)
+		if err != nil {
+			if ctx.Err() != nil {
+				return
+			}
+			time.Sleep(time.Second)
+			continue
+		}
 
-func (c *Client) Commit(ctx context.Context, instance, topic, group string, msg kafka.Message) error {
-	if group == "" {
-		return nil
+		if err := handler(msg); err != nil {
+			if err == context.Canceled {
+				return
+			}
+			fmt.Printf("Failed to process message: %v\n", err)
+			continue
+		}
+
+		if err := r.CommitMessages(ctx, msg); err != nil {
+			fmt.Printf("Failed to commit messages: %v\n", err)
+		}
 	}
-
-	key := readerKey(instance, topic, group)
-
-	c.mu.Lock()
-	r := c.readers[key]
-	c.mu.Unlock()
-
-	if r == nil {
-		return nil
-	}
-	return r.CommitMessages(ctx, msg)
 }
 
 func (c *Client) Close() {
 	for _, w := range c.writers {
 		_ = w.Close()
 	}
-	for _, r := range c.readers {
-		_ = r.Close()
-	}
 }
 
 // Usage
 
-// 1、Producer（Key = nil）
+// 1、Producer
 // 	err := client.Produce(ctx, "instance", "topic", nil, []byte(`{"id":123,"type":"email"}`))
 
-// Consumer（worker group）
-// for {
-// 	msg, err := client.Consume(ctx, "instance", "topic", "group")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	handleTask(msg.Value)
-
-// 	_ = client.Commit(ctx, "instance", "topic", "group", msg)
+// 2、Consumer
+// for i := 0; i < 3; i++ {
+// 	go client.Consume(ctx, "instance", "topic", "group", func(m kafka.Message) error {
+// 		fmt.Printf("Worker %d processing: %s\n", i, string(m.Value))
+// 		return nil
+// 	})
 // }
-
-// 2、Producer（Key = user_id）
-// err := client.Produce(ctx, "instance", "topic", nil, []byte(`{"id":123,"type":"email"}`))
-
-// Consumer（worker group）
-// for {
-// 	msg, err := client.Consume(ctx, "instance", "topic", "group")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	handleTask(msg.Value)
-
-// 	_ = client.Commit(ctx, "instance", "topic", "group", msg)
-// }
-
-// 3、Consumer
-// for {
-// 	msg, err := client.Consume(ctx, "instance", "topic", "")
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	handleTask(msg.Value)
-// }
-
-// go func() {
-// 	for {
-// 		msg, err := client.Consume(ctx, "instance", "topic", "")
-// 		if err != nil {
-// 			if ctx.Err() != nil {
-// 				return
-// 			}
-// 			continue
-// 		}
-// 		handleTask(msg.value)
-// 	}
-// }()

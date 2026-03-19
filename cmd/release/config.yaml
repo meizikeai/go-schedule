@@ -10,9 +10,9 @@ mysql:
       - "database:password@tcp(127.0.0.1:3306)/tablename"
     slave:
       - "database:password@tcp(127.0.0.1:3306)/tablename"
-    max_idle_conns: 100
     max_open_conns: 200
-    conn_max_lifetime: 60
+    max_idle_conns: 100
+    conn_max_lifetime: 300
 
 redis:
   default:

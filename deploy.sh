@@ -23,6 +23,10 @@ remote_project="$remote_pwd/$project_name" # Remote final production path
 remote_version="$remote_project/version"   # Remote backup directory
 
 # --- Environment Setup ---
+if [ $# -eq 0 ]; then
+  echo -e "✗ Missing environment name. Usage: bash $0 <environment-name>\n" >&2
+  exit 1
+fi
 if [ "$1" == "test" ]; then
   target_ips=$ip_test
   ssh_key="$ssh_key_base/dev_main"
@@ -119,6 +123,6 @@ fi
 # --- Deployment Complete ---
 echo "=========================="
 echo "Deployment completed successfully."
-echo "Path        : $remote_project"
-echo "Version     : $times"
-echo "Time        : $(date '+%Y-%m-%d %H:%M:%S')"
+echo "Path    : $remote_project"
+echo "Version : $times"
+echo "Time    : $(date '+%Y-%m-%d %H:%M:%S')"

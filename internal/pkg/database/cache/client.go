@@ -7,7 +7,7 @@ import (
 
 	"go-schedule/internal/config"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type Clients struct {
@@ -31,15 +31,12 @@ func NewClient(cfg *map[string][]config.RedisInstance) *Clients {
 
 func createClient(option *config.RedisInstance) *redis.Client {
 	cfg := &redis.Options{
-		Addr:               option.Addrs[0],
-		Password:           option.Password,
-		DB:                 option.DB,
-		PoolSize:           option.PoolSize,
-		MinIdleConns:       option.MinIdleConns,
-		ReadTimeout:        1 * time.Second,
-		WriteTimeout:       1 * time.Second,
-		IdleTimeout:        60 * time.Second,
-		IdleCheckFrequency: 30 * time.Second,
+		Addr:            option.Addrs[0],
+		Password:        option.Password,
+		DB:              option.DB,
+		PoolSize:        option.PoolSize,
+		MinIdleConns:    option.MinIdleConns,
+		ConnMaxIdleTime: 5 * 60 * time.Second,
 	}
 
 	client := redis.NewClient(cfg)
